@@ -1,6 +1,6 @@
 # qcocoacontrols
 
-The library helps to make use of native macOS controls in a Qt app.
+The library helps to make use of native macOS controls in a Qt app. On Windows (and others?) it should provide a decent fallback.
 
 Many of those controls are used in our [Macs Fan Control](https://crystalidea.com/anytoiso) and [AnyToISO](https://crystalidea.com/macs-fan-control) apps.
 

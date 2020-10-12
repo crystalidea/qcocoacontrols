@@ -22,3 +22,8 @@ To compile on macOS we use Qt Creator and Visual Studio 2017 Community on Window
 ##### QCocoaSegmentedButton:
 
 ![QCocoaSegmentedButton](/images/QCocoaSegmentedButton.png)
+
+##### Two examples of QCocoaButtonActionMenu, the second icon position set to QCocoaButton::IconOnly:
+
+![QCocoaButtonActionMenu.png](/images/QCocoaButtonActionMenu.png)
+

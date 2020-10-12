@@ -9,3 +9,6 @@ Many of those controls are used in our [Macs Fan Control](https://crystalidea.co
 The code is far from being ideal so you're welcome to contribute.
 
 To compile on macOS we use Qt Creator and Visual Studio 2017 Community on Windows
+
+##### QCocoaPreferencesDialog:
+![QCocoaPreferencesDialog](/images/QCocoaPreferencesDialog.png)

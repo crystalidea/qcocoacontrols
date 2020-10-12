@@ -9,3 +9,21 @@ Many of those controls are used in our [Macs Fan Control](https://crystalidea.co
 The code is far from being ideal so you're welcome to contribute.
 
 To compile on macOS we use Qt Creator and Visual Studio 2017 Community on Windows
+
+## Some examples:
+
+##### QCocoaPreferencesDialog:
+![QCocoaPreferencesDialog](/images/QCocoaPreferencesDialog.png)
+
+##### QCocoaButton with BezelStyle::HelpButton:
+
+![QCocoaButton](/images/QCocoaButton_help.png)
+
+##### QCocoaSegmentedButton:
+
+![QCocoaSegmentedButton](/images/QCocoaSegmentedButton.png)
+
+##### Two examples of QCocoaButtonActionMenu, the second with icon position set to QCocoaButton::IconOnly:
+
+![QCocoaButtonActionMenu.png](/images/QCocoaButtonActionMenu.png)
+

@@ -18,3 +18,7 @@ To compile on macOS we use Qt Creator and Visual Studio 2017 Community on Window
 ##### QCocoaButton with BezelStyle::HelpButton:
 
 ![QCocoaButton](/images/QCocoaButton_help.png)
+
+##### QCocoaSegmentedButton:
+
+![QCocoaSegmentedButton](/images/QCocoaSegmentedButton.png)

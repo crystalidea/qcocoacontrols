@@ -1,7 +1,5 @@
-#ifndef qcocoapreferencesdialog_h__
-#define qcocoapreferencesdialog_h__
-
-#include <core_qt/QDialogEx.h>
+#ifndef QCOCOAPREFERENCES_DIALOG_DEFINED
+#define QCOCOAPREFERENCES_DIALOG_DEFINED
 
 class QCocoaPreferencesDialog;
 class QPreferencesPage;
@@ -12,7 +10,7 @@ class QCocoaToolbarImpl : public QObject
 
 public:
 
-    QCocoaToolbarImpl(QCocoaPreferencesDialog *parent);
+    explicit QCocoaToolbarImpl(QCocoaPreferencesDialog *parent);
     ~QCocoaToolbarImpl();
 
     void addButton(QPreferencesPage *page, bool bLast);
@@ -54,11 +52,12 @@ signals:
     void needRecalculateLayout();
 };
 
-class QCocoaPreferencesDialog : public QDialogEx
+class QCocoaPreferencesDialog : public QDialog
 {
     Q_OBJECT
 
 public:
+
     explicit QCocoaPreferencesDialog(QWidget *parent = nullptr);
     ~QCocoaPreferencesDialog();
 
@@ -90,4 +89,4 @@ private:
     QString _prependingTitle;
 };
 
-#endif // qcocoapreferencesdialog_h__
+#endif // QCOCOAPREFERENCES_DIALOG_DEFINED

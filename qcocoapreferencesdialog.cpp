@@ -2,7 +2,7 @@
 #include "qcocoapreferencesdialog.h"
 
 QCocoaPreferencesDialog::QCocoaPreferencesDialog(QWidget *parent) :
-    QDialogEx(parent), _currentPage(0)
+    QDialog(parent), _currentPage(0)
 {
     setAttribute(Qt::WA_QuitOnClose, false);
 

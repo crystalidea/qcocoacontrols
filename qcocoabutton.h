@@ -45,7 +45,7 @@ public:
         //NSImageTrailing API_AVAILABLE(macosx(10.12)) = 8
     };
 
-    QCocoaButton(QWidget *parent);
+    explicit QCocoaButton(QWidget *parent);
     ~QCocoaButton();
 
 protected:

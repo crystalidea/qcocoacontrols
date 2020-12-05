@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "qcocoapreferencesdialog.h"
 
-QCocoaPreferencesDialog::QCocoaPreferencesDialog(QWidget *parent) :
-    QDialogEx(parent), _currentPage(0)
+QCocoaPreferencesDialog::QCocoaPreferencesDialog(QWidget *parent, Qt::WindowFlags f) :
+    QDialog(parent, f), _currentPage(0)
 {
     setAttribute(Qt::WA_QuitOnClose, false);
 

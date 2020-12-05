@@ -1,13 +1,11 @@
 #include "stdafx.h"
 #include "qcocoapreferencesdialog.h"
 
-#include <functional>
-
 class QToolBarNoTooltips : public QToolBar
 {
 public :
 
-    QToolBarNoTooltips(QWidget *parent): QToolBar(parent)
+    explicit QToolBarNoTooltips(QWidget *parent): QToolBar(parent)
     {
 
     }
@@ -38,7 +36,7 @@ class QCocoaPreferencesPrivate
 {
 public:
 
-    QCocoaPreferencesPrivate(QCocoaPreferencesDialog *parent)
+    explicit QCocoaPreferencesPrivate(QCocoaPreferencesDialog *parent)
     {
         _toolbar = new QToolBarNoTooltips(parent);
         _toolbar->setFloatable(false);
@@ -49,6 +47,9 @@ public:
 
         _actionGroup = new QActionGroup(_toolbar);
     }
+
+    QCocoaPreferencesPrivate(const QCocoaPreferencesPrivate &c) = delete; // non construction-copyable
+    QCocoaPreferencesPrivate& operator=(const QCocoaPreferencesPrivate&) = delete; // non copyable
 
     QToolBar *toolbar() const { return _toolbar; }
     QActionGroup *actionGroup() const { return _actionGroup; }

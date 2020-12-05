@@ -16,7 +16,7 @@ class QCocoaWidget : public QWidget
 
 public:
 
-    QCocoaWidget(QWidget *parent);
+    explicit QCocoaWidget(QWidget *parent);
     ~QCocoaWidget() {}
 
     void setupLayout(NSView *cocoaView);

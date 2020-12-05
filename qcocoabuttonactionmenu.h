@@ -19,7 +19,7 @@ public:
     void setFixedWidth(int w); // если мы не хотим, чтобы кнопка себя растягивала при смене текста не ней
     int fixedWidth() const { return _fixedWidth; }
 
-    QString	text() const { return _text;}
+    QString text() const { return _text;}
 
 private:
 

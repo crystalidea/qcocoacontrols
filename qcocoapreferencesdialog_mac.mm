@@ -6,13 +6,15 @@
 #import <AppKit/NSToolbar.h>
 #import <AppKit/NSToolbarItem.h>
 
+#include "bigsurtoolbar.h"
+
 class QCocoaPreferencesPrivate
 {
 public:
 
     NSToolbar *nativeToolbar() const { return _macToolbar->nativeToolbar(); }
 
-    QMacToolBar *_macToolbar;
+    QMacToolBarBigSur *_macToolbar;
     QCocoaPreferencesDialog *_dialog;
 };
 
@@ -21,7 +23,7 @@ QCocoaToolbarImpl::QCocoaToolbarImpl(QCocoaPreferencesDialog *parent)
 {
     _private = new QCocoaPreferencesPrivate();
 
-    _private->_macToolbar = new QMacToolBar(this);
+    _private->_macToolbar = new QMacToolBarBigSur(this);
     _private->_dialog = parent;
 
     NSToolbar *nativeToolbar = _private->nativeToolbar();
@@ -54,7 +56,7 @@ void QCocoaToolbarImpl::addButton(QPreferencesPage *page, bool bLast)
     if (bLast)
     {
         _private->_dialog->window()->winId(); // create window->windowhandle()
-        _private->_macToolbar->attachToWindow(_private->_dialog->window()->windowHandle());
+        _private->_macToolbar->attachToWindowWithStyle(_private->_dialog->window()->windowHandle(), QMacToolBarBigSur::StylePreference);
 
         setSelectedButton(0); // now make the first item selected
     }

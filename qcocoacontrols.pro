@@ -19,3 +19,5 @@ SOURCES += qcocoapreferencesdialog.cpp
 
 OBJECTIVE_SOURCES += qcocoawidget.mm qcocoabutton.mm qcocoabutton_p.mm qcocoasegmentedbutton.mm qcocoaslider.mm qcocoagradientbutton.mm qcocoabox.mm \
     qcocoamessagebox.mm qcocoapreferencesdialog_mac.mm qcocoaicon.mm qcocoabuttonactionmenu.mm
+
+SOURCES += bigsurtoolbar.mm bigsurtoolbar.h

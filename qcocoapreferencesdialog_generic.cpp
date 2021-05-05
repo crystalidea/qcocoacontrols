@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "qcocoapreferencesdialog.h"
 
+#include <functional>
+
 class QToolBarNoTooltips : public QToolBar
 {
 public :

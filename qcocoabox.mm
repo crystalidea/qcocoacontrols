@@ -49,11 +49,11 @@ void QCocoaBox::setContentWidget(QWidget *widget)
 {
     if (widget)
     {
-        QMacCocoaViewContainer *p = container();
+        QWidget *w = nativeWidget();
 
-        if (p)
+        if (w)
         {
-            QHBoxLayout *layout = new QHBoxLayout(p);
+            QHBoxLayout *layout = new QHBoxLayout(w);
             layout->setContentsMargins(QMargins(LEFT_RIGHT_MARGIN, TOP_MARGIN, LEFT_RIGHT_MARGIN, BOTTOM_MARGIN));
             layout->addWidget(widget);
 

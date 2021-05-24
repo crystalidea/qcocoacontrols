@@ -6,9 +6,9 @@
 #ifdef Q_OS_MAC
 
 #include <QVBoxLayout>
-#include <QMacCocoaViewContainer>
 
 Q_FORWARD_DECLARE_OBJC_CLASS(NSImage);
+Q_FORWARD_DECLARE_OBJC_CLASS(NSView);
 
 class QCocoaWidget : public QWidget
 {
@@ -21,7 +21,7 @@ public:
 
     void setupLayout(NSView *cocoaView);
 
-    QMacCocoaViewContainer *container() const;
+    QWidget *nativeWidget() const;
 
 protected slots:
 
@@ -36,7 +36,7 @@ private:
 
     NSView *view;
 
-    bool m_bPlannedToBeInvisible; // скорее всего, Qt принудительно показывает виджет при старте
+    bool m_bPlannedToBeInvisible; // most likely Qt shows the widget initially
 };
 
 #else

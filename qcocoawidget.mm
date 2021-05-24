@@ -17,16 +17,17 @@ void QCocoaWidget::setupLayout(NSView *cocoaView)
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    QMacCocoaViewContainer *pContainer = new QMacCocoaViewContainer(cocoaView, this);
+    QWidget *nativeWidget = QWidget::createWindowContainer(QWindow::fromWinId((WId)cocoaView), this);
+    nativeWidget->setAttribute(Qt::WA_NativeWindow, true);
 
-    layout->addWidget(pContainer);
+    layout->addWidget(nativeWidget);
 }
 
-QMacCocoaViewContainer *QCocoaWidget::container() const
+QWidget *QCocoaWidget::nativeWidget() const
 {
     QVBoxLayout *v = static_cast<QVBoxLayout *>(layout());
 
-    return static_cast<QMacCocoaViewContainer *>(v->itemAt(0) ? v->itemAt(0)->widget() : nullptr);
+    return static_cast<QWidget *>(v->itemAt(0) ? v->itemAt(0)->widget() : nullptr);
 }
 
 void QCocoaWidget::setVisibleCustom(bool visible)
@@ -50,5 +51,6 @@ void QCocoaWidget::changeEvent(QEvent *event)
 {
     QWidget::changeEvent(event);
 
-    [view setEnabled: isEnabled() ? YES: NO];
+    if ([view respondsToSelector:@selector(setEnabled:)])
+        [view setEnabled: isEnabled() ? YES: NO];
 }

@@ -5,6 +5,9 @@
 #import <AppKit/NSPopUpButton.h>
 #import <AppKit/NSPopUpButtonCell.h>
 
+const int FIXED_WIDTH_ICON_ONLY = 44;
+const int FIXED_HEIGHT = 28;
+
 class CocoaButtonPrivateActionMenu : public CocoaButtonPrivate
 {
 public:
@@ -33,23 +36,16 @@ public:
 
     void updateSize() override
     {
-        QCocoaButtonActionMenu *btnCocoa = static_cast<QCocoaButtonActionMenu *>(getButton());
-
         NSRect frame = [_nsButton frame];
 
         [_nsButton setFrame:frame];
 
         if ([_nsButton imagePosition] == NSImageOnly)
-            _cocoaButton->setFixedSize(44, NSHeight(frame));
+            _cocoaButton->setFixedSize(FIXED_WIDTH_ICON_ONLY, FIXED_HEIGHT);
         else
         {
-            if (btnCocoa->fixedWidth())
-                _cocoaButton->setFixedSize(btnCocoa->fixedWidth(), NSHeight(frame));
-            else
-            {
-                [_nsButton sizeToFit];
-                _cocoaButton->setFixedSize(NSWidth(frame), NSHeight(frame));
-            }
+            [_nsButton sizeToFit];
+            _cocoaButton->setFixedSize(NSWidth(frame), FIXED_HEIGHT);
         }
     }
 
@@ -92,7 +88,7 @@ public:
 QCocoaButtonActionMenu::QCocoaButtonActionMenu(QWidget *parent)
     : QCocoaButton(parent, new CocoaButtonPrivateActionMenu(this) )
 {
-    setBezelStyle(QCocoaButton::TexturedRounded);
+    _bezelStyle = QCocoaButton::TexturedRounded;
 
     NSPopUpButton *btn = static_cast<NSPopUpButton *>(pimpl->getNSButton());
     NSPopUpButtonCell *buttonCell = btn.cell;
@@ -131,11 +127,4 @@ void QCocoaButtonActionMenu::setText(const QString &text)
 
         pimpl->updateSize();
     }
-}
-
-void QCocoaButtonActionMenu::setFixedWidth(int w)
-{
-    _fixedWidth = w;
-
-    pimpl->updateSize();
 }

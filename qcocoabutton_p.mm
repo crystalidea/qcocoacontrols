@@ -61,9 +61,9 @@ void CocoaButtonPrivate::clicked()
 
 bool CocoaButtonPrivate::isSpecialButton() // no title and icon
 {
-    return (_cocoaButton->style == QCocoaButton::HelpButton ||
-            _cocoaButton->style == QCocoaButton::Disclosure ||
-            _cocoaButton->style == QCocoaButton::RoundedDisclosure);
+    return (_cocoaButton->_bezelStyle == QCocoaButton::HelpButton ||
+            _cocoaButton->_bezelStyle == QCocoaButton::Disclosure ||
+            _cocoaButton->_bezelStyle == QCocoaButton::RoundedDisclosure);
 }
 
 void CocoaButtonPrivate::updateSize()

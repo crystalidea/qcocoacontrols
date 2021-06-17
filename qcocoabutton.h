@@ -52,6 +52,8 @@ protected:
 
     QCocoaButton(QWidget *parent, CocoaButtonPrivate *customPrivate);
 
+    void showEvent(QShowEvent *event) override;
+
 public slots:
 
     virtual void setText(const QString &text);
@@ -89,7 +91,7 @@ protected:
 
     friend class CocoaButtonPrivate;
     std::unique_ptr<CocoaButtonPrivate> pimpl;
-    BezelStyle style;
+    BezelStyle _bezelStyle = BezelStyle::Rounded;
 };
 
 #endif // qcocoabutton_h__

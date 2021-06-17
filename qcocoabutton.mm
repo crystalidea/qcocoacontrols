@@ -14,14 +14,7 @@ QCocoaButton::QCocoaButton(QWidget *parent)
 
     setupLayout(pimpl->getNSButton());
 
-    setBezelStyle(QCocoaButton::Rounded);
-
-    //setMinimumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX); // без этоо дает странные варнинги в дебаге:
-    // QWidget::setMinimumSize: (/QCocoaButton) The largest allowed size is (16777215,16777215)
-    // либо
-    // QWidget::setMinimumSize: (/QCocoaButton) Negative sizes (-1599184954,30) are not possible
-
-    pimpl->updateSize();
+    // calling a virtual function updateSize from a constructor is a bad idea, it's now done in the showEvent method
 }
 
 QCocoaButton::QCocoaButton(QWidget *parent, CocoaButtonPrivate *customPrivate)
@@ -30,8 +23,13 @@ QCocoaButton::QCocoaButton(QWidget *parent, CocoaButtonPrivate *customPrivate)
     pimpl.reset(customPrivate);
 
     setupLayout(pimpl->getNSButton());
+}
 
-    pimpl->updateSize();
+void QCocoaButton::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
+
+    setBezelStyle(_bezelStyle); // init default bezel style, will call updateSize
 }
 
 QCocoaButton::~QCocoaButton()
@@ -41,7 +39,8 @@ QCocoaButton::~QCocoaButton()
 
 void QCocoaButton::setBezelStyle(BezelStyle bezelStyle)
 {
-    style = bezelStyle;
+    _bezelStyle = bezelStyle;
+
     switch(bezelStyle) {
         case QCocoaButton::Disclosure:
         case QCocoaButton::Circular:

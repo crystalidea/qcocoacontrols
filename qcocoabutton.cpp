@@ -121,3 +121,8 @@ void QCocoaButton::setMenu(QMenu *menu)
     if (btn)
         btn->setMenu(menu);
 }
+
+void QCocoaButton::showEvent(QShowEvent* event)
+{
+    Q_UNUSED(event);
+}

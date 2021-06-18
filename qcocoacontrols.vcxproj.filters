@@ -25,14 +25,8 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_qcocoabox.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoabox.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_qcocoabutton.cpp">
       <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoabutton.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_qcocoagradientbutton.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -43,14 +37,8 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_qcocoasegmentedbutton.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoasegmentedbutton.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_qcocoaslider.cpp">
       <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoaslider.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="qcocoabutton.cpp">
       <Filter>Source Files</Filter>
@@ -84,6 +72,18 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_qcocoabuttonactionmenu.cpp">
       <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qcocoabox.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qcocoabutton.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qcocoaslider.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qcocoasegmentedbutton.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_qcocoabuttonactionmenu.cpp">
       <Filter>Generated Files\Release</Filter>

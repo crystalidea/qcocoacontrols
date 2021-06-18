@@ -2,3 +2,13 @@ reference
 Makefile
 *.stash
 *.user
+
+*.obj
+*.tlog
+*.log
+*.pch
+*.recipe
+
+*.FileListAbsolute.txt
+
+GeneratedFiles

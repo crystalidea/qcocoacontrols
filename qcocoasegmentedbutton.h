@@ -33,7 +33,7 @@ public:
         NSSegmentSwitchTrackingMomentary = 2 // A segment is selected only when tracking.
     };
 
-    QCocoaSegmentedButton(QWidget *pParent = nullptr);
+    explicit QCocoaSegmentedButton(QWidget *pParent = nullptr);
     ~QCocoaSegmentedButton();
 
     QSize sizeHint() const;

@@ -36,7 +36,7 @@ class QPreferencesPage : public QWidget
 
 public:
 
-    QPreferencesPage(QWidget *parent)
+    explicit QPreferencesPage(QWidget *parent)
         : QWidget(parent)
     {
 
@@ -58,7 +58,7 @@ class QCocoaPreferencesDialog : public QDialog
 
 public:
 
-    explicit QCocoaPreferencesDialog(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    QCocoaPreferencesDialog(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~QCocoaPreferencesDialog();
 
     void addPage(QPreferencesPage *page, bool bLast = false);

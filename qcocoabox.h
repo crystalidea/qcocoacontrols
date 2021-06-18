@@ -19,9 +19,9 @@ public:
        NSBoxOldStyle  = 3  // Specifies that the box is an OS X v10.2–style box.
     };
 
-    QCocoaBox(QWidget * parent = 0);
+    explicit QCocoaBox(QWidget * parent = 0);
 
-    virtual QSize sizeHint() const;
+    virtual QSize sizeHint() const override;
 
 public:
 
@@ -29,8 +29,6 @@ public:
     void setBoxType(BoxType type);
 
     void setContentWidget(QWidget *widget);
-
-signals:
 
 private:
 

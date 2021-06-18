@@ -20,7 +20,7 @@ public:
         CircularSlider = 2
     };
 
-    QCocoaSlider(QWidget * parent = 0);
+    explicit QCocoaSlider(QWidget * parent = 0);
 
     virtual QSize sizeHint() const;
 

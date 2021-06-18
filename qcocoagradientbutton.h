@@ -17,7 +17,7 @@ class QCocoaGradientButton: public QCocoaSegmentedButton
 
 public:
 
-    QCocoaGradientButton(QWidget *pParent = 0);
+    explicit QCocoaGradientButton(QWidget *pParent = 0);
     ~QCocoaGradientButton();
 
     virtual QSize sizeHint() const;

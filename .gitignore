@@ -12,3 +12,8 @@ Makefile
 *.FileListAbsolute.txt
 
 GeneratedFiles
+
+*.o
+*.a
+moc_*.cpp
+moc_*.h

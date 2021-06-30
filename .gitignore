@@ -17,3 +17,6 @@ GeneratedFiles
 *.a
 moc_*.cpp
 moc_*.h
+
+*.pdb
+*.lib

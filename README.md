@@ -19,6 +19,10 @@ To compile on macOS we use Qt Creator and Visual Studio 2019 Community on Window
 
 ![QCocoaButton](/images/QCocoaButton_help.png)
 
+##### QCocoaPopover displayed for the help button:
+
+![QCocoaPopover.png](/images/QCocoaPopover.png)
+
 ##### QCocoaSegmentedButton:
 
 ![QCocoaSegmentedButton](/images/QCocoaSegmentedButton.png)
@@ -26,4 +30,3 @@ To compile on macOS we use Qt Creator and Visual Studio 2019 Community on Window
 ##### Two examples of QCocoaButtonActionMenu, the second with icon position set to QCocoaButton::IconOnly:
 
 ![QCocoaButtonActionMenu.png](/images/QCocoaButtonActionMenu.png)
-

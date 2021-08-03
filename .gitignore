@@ -20,3 +20,4 @@ moc_*.h
 
 *.pdb
 *.lib
+.DS_Store

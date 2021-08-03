@@ -40,7 +40,7 @@ void QCocoaWidget::setVisibleCustom(bool visible)
 
 void QCocoaWidget::showEvent(QShowEvent *event)
 {
-    // при старте, если мы хотим, чтобы view было невидимым, необходим следущий код
+    // upon startup if we'd want the widget to be displayed invisible
     if (m_bPlannedToBeInvisible)
         setVisibleCustom(false);
 

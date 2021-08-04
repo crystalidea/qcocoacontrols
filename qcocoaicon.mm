@@ -65,7 +65,9 @@ QPixmap QCocoaIcon::standardIcon(StandardIcon type, int nSize)
         {
             pix = QtMac::fromCGImageRef(imageRef);
 
-            CFRelease(imageRef);
+            // The CGImageRef returned is guaranteed to live as long as the current autorelease pool.
+            // The caller should not release the CGImage. This is the standard Cocoa convention, but people may not realize that it applies to CFTypes.
+            //CFRelease(imageRef);
         }
     }
 

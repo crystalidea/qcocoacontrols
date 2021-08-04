@@ -195,11 +195,7 @@ void QCocoaSegmentedButton::setSegmentIcon(int iSegment, QCocoaIcon::StandardIco
     NSImage *nsImage = QCocoaIcon::standardIcon(icon);
 
     if (nsImage)
-    {
         [pimpl->control setImage: nsImage forSegment: iSegment];
-
-        [nsImage release];
-    }
 
     pimpl->updateSize();
 }

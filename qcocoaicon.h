@@ -26,10 +26,11 @@ public:
         Info, // Shows or hides an information window or view.
     };
 
+    // all methods return an autorelease object
     static NSImage *imageFromQImage(const QImage &img);
     static NSImage * imageFromQIcon(const QIcon &icon);
-
     static NSImage * standardIcon(StandardIcon type);
+
     static QPixmap standardIcon(StandardIcon type, int nSize);
 };
 

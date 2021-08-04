@@ -6,8 +6,6 @@
 
 NSImage * QCocoaIcon::standardIcon(StandardIcon type)
 {
-    QString str;
-
     NSString *nsImageName = nil;
     NSImage *nsImage = nil;
 
@@ -67,7 +65,7 @@ QPixmap QCocoaIcon::standardIcon(StandardIcon type, int nSize)
         {
             pix = QtMac::fromCGImageRef(imageRef);
 
-            //CFRelease(imageRef); // not needed with autorelease pool
+            CFRelease(imageRef);
         }
     }
 

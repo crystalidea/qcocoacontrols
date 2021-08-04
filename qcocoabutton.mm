@@ -111,7 +111,7 @@ void QCocoaButton::setIcon(const QIcon &image)
     if (pimpl->isSpecialButton())
         return;
 
-    NSImage *img = QCocoaIcon::iconToNSImage(image);
+    NSImage *img = QCocoaIcon::imageFromQIcon(image);
 
     if (img)
         pimpl->setImage(img);
@@ -123,7 +123,7 @@ void QCocoaButton::setIcon(QCocoaIcon::StandardIcon icon)
 {
     QMacAutoReleasePool pool;
 
-    NSImage *img = QCocoaIcon::iconToNSImage(icon);
+    NSImage *img = QCocoaIcon::standardIcon(icon);
 
     if (img)
         pimpl->setImage(img);

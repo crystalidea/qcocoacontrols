@@ -1,11 +1,10 @@
 #include "stdafx.h"
 #include "qcocoaicon.h"
+#include "qcoregraphics.h"
 
 #include <QtMacExtras>
 
-#import <AppKit/NSImage.h>
-
-NSImage * QCocoaIcon::iconToNSImage(StandardIcon type)
+NSImage * QCocoaIcon::standardIcon(StandardIcon type)
 {
     QString str;
 
@@ -41,40 +40,14 @@ NSImage * QCocoaIcon::iconToNSImage(StandardIcon type)
     return nsImage;
 }
 
-NSImage *QCocoaIcon::iconToNSImage(const QIcon& icon, const QWidget *widget)
+NSImage *QCocoaIcon::imageFromQIcon(const QIcon& icon)
 {
-    if (icon.isNull())
-        return 0;
+    return [NSImage imageFromQIcon: icon];
+}
 
-    NSImage *image = nil;
-    image = [[NSImage alloc] init];
-
-    int nScreenNumber = QApplication::desktop()->screenNumber(widget);
-
-    if (nScreenNumber != -1)
-    {
-        QScreen *screen = QApplication::screens().at(nScreenNumber);
-
-        if (screen)
-        {
-            qreal pixelRatio = screen->devicePixelRatio();
-
-            for (QSize sz : icon.availableSizes())
-            {
-                QPixmap pixmap = icon.pixmap(sz);
-
-                CGImageRef cgimage = QtMac::toCGImageRef(pixmap);
-                NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithCGImage:cgimage];
-                // https://stackoverflow.com/questions/24945615/how-to-show-in-memory-nsimage-as-retina-2x
-                [bitmapRep setSize: NSMakeSize(pixmap.width() / pixelRatio, pixmap.height() / pixelRatio ) ];
-                [image addRepresentation:bitmapRep];
-                [bitmapRep release];
-                CFRelease(cgimage);
-            }
-        }
-    }
-
-    return image;
+NSImage *QCocoaIcon::imageFromQImage(const QImage &img)
+{
+    return [NSImage imageFromQImage: img];
 }
 
 QPixmap QCocoaIcon::standardIcon(StandardIcon type, int nSize)
@@ -83,7 +56,7 @@ QPixmap QCocoaIcon::standardIcon(StandardIcon type, int nSize)
 
     QPixmap pix;
 
-    NSImage *nsImage = QCocoaIcon::iconToNSImage(type);
+    NSImage *nsImage = QCocoaIcon::standardIcon(type);
 
     if (nsImage)
     {
@@ -100,3 +73,4 @@ QPixmap QCocoaIcon::standardIcon(StandardIcon type, int nSize)
 
     return pix;
 }
+

@@ -178,7 +178,7 @@ void QCocoaSegmentedButton::setSegmentIcon(int iSegment, const QIcon& icon)
     if (!pimpl)
         return;
 
-    NSImage *nsImage = QCocoaIcon::iconToNSImage(icon, this);
+    NSImage *nsImage = QCocoaIcon::imageFromQIcon(icon);
 
     if (nsImage)
     {
@@ -192,7 +192,7 @@ void QCocoaSegmentedButton::setSegmentIcon(int iSegment, const QIcon& icon)
 
 void QCocoaSegmentedButton::setSegmentIcon(int iSegment, QCocoaIcon::StandardIcon icon)
 {
-    NSImage *nsImage = QCocoaIcon::iconToNSImage(icon);
+    NSImage *nsImage = QCocoaIcon::standardIcon(icon);
 
     if (nsImage)
     {

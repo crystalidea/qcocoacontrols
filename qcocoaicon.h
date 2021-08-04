@@ -26,9 +26,10 @@ public:
         Info, // Shows or hides an information window or view.
     };
 
-    static NSImage * iconToNSImage(StandardIcon type);
-    static NSImage * iconToNSImage(const QIcon &icon, const QWidget *widget = nullptr);
+    static NSImage *imageFromQImage(const QImage &img);
+    static NSImage * imageFromQIcon(const QIcon &icon);
 
+    static NSImage * standardIcon(StandardIcon type);
     static QPixmap standardIcon(StandardIcon type, int nSize);
 };
 

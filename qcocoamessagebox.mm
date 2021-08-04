@@ -61,7 +61,7 @@ int QCocoaMessageBox::exec()
     if (icon() == QMessageBox::Critical)
         alert.alertStyle = NSAlertStyleCritical;
     else if (!iconPixmap().isNull())  //NSAlertStyleWarning почему-то не меняет иконки  поэтому буду использовать этот метод
-        alert.icon = QCocoaIcon::iconToNSImage(iconPixmap());
+        alert.icon = QCocoaIcon::imageFromQIcon(iconPixmap());
 
     QCheckBox *checkBtn = checkBox();
 

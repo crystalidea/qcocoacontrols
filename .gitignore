@@ -21,3 +21,4 @@ moc_*.h
 *.pdb
 *.lib
 .DS_Store
+uic_wrapper.sh

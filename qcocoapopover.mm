@@ -25,10 +25,13 @@ static int EventPopoverClosed = QEvent::User + 1;
 
 -(void)loadView {
 
+    NSView *nativeWidgetView = reinterpret_cast<NSView *>(_contents->winId());
+
+#if (QT_VERSION > QT_VERSION_CHECK(5, 6, 3)) // assumption
+
     // this NSWindow hack basically detaches NSView from QWidget
     // and doesn't let top level QWidget to be displayed as a window
 
-    NSView *nativeWidgetView = reinterpret_cast<NSView *>(_contents->winId());
     NSWindow *window = [[NSWindow alloc] init];
     NSView *contentView = [window contentView];
 
@@ -36,16 +39,27 @@ static int EventPopoverClosed = QEvent::User + 1;
 
     [window release];
 
-    _contents->show(); // only in the end!
+    _contents->show();
+
+#else // honestly I only checked this to be working fine on Qt 5.6
+
+    // this trick disables displaying of another top-level window
+
+    _contents->setAttribute(Qt::WA_NativeWindow, true); // must be set to access QWindow
+
+    _contents->show();
+    _contents->windowHandle()->setVisible(false);
+
+#endif
 
     [self setView:nativeWidgetView];
 }
 
 - (void) receivePopoverClosedNotification:(NSNotification *) notification {
 
-    [[NSNotificationCenter defaultCenter] removeObserver: self];
+    Q_UNUSED(notification);
 
-    //NSLog(@"--> receivePopoverClosedNotification");
+    [[NSNotificationCenter defaultCenter] removeObserver: self];
 
     QEvent ev( (QEvent::Type)EventPopoverClosed);
     QCoreApplication::sendEvent(_contents, &ev);
@@ -95,15 +109,17 @@ public:
         }
     }
 
+    void closeNSPopover()
+    {
+        [_popup close];
+    }
+
     void close()
     {
         if (_popup.shown)
         {
             [_popup close];
         }
-
-        if (_parent->_contents->isVisible()) // why do we need to check this?
-            _parent->_contents->close();
     }
 
     void setPopoverBehavior(QCocoaPopover::PopoverBehavior b)
@@ -122,11 +138,12 @@ private:
     QCocoaPopover *_parent;
 };
 
+static const char *PROP_IS_POPOVER = "QCocoaPopover";
+
 QCocoaPopover::QCocoaPopover(QObject *parent, QWidget *contents)
     : QObject(parent), _contents(contents), p(new QCocoaPopoverPrivate(this))
 {
-    // this is required for propert handling of Cmd+Q while popover is displayed
-    QGuiApplication::instance()->installEventFilter(this);
+    _contents->setProperty(PROP_IS_POPOVER, true);
 
     // this is required to handle custom event (EventPopoverClosed)
     _contents->installEventFilter(this);
@@ -134,11 +151,7 @@ QCocoaPopover::QCocoaPopover(QObject *parent, QWidget *contents)
 
 QCocoaPopover::~QCocoaPopover()
 {
-    QGuiApplication::instance()->removeEventFilter(this);
-
     _contents->removeEventFilter(this);
-
-    //NSLog(@"--> QCocoaPopover destroy");
 
     p->close();
 
@@ -149,8 +162,6 @@ bool QCocoaPopover::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj == _contents && event->type() == EventPopoverClosed) // cocoa closed the popover
     {
-        //NSLog(@"--> EventPopoverClosed");
-
         // no need to close the popup and the widget because they are already closed by cocoa
         // only need to emit the signal
 
@@ -158,17 +169,9 @@ bool QCocoaPopover::eventFilter(QObject *obj, QEvent *event)
 
         return true;
     }
-    else if (event->type() == QEvent::Quit) // disable quit from the app by pressing Cmd+Q
+    else if (event->type() == QEvent::Close) // if user closed QWidget need to make sure that popup is closed as well
     {
-        //if (_contents->isActiveWindow()) // no check for active widget !
-        {
-            close();
-
-            //qDebug("--> Popover close in quit event");
-
-            //event->ignore();
-            //return true;
-        }
+        p->close();
     }
 
     return false;

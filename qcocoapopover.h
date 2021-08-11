@@ -9,6 +9,7 @@ class QCocoaMenubarItem;
 // 2. contentsWidget will be deleted after QCocoaPopover is destroyed
 // 3. the class it not well tested and should be improved
 // 4. currently no fallback for non mac systems is implemented
+// 5. on Qt prior to 5.9.3 requires a patch, see QTBUG-63451
 
 class QCocoaPopover : public QObject
 {

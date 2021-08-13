@@ -1,18 +1,7 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-09-15T15:22:55
-#
-#-------------------------------------------------
+TEMPLATE = subdirs
 
-QT       += core gui
+SUBDIRS += app qcocoacontrols
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+qcocoacontrols.subdir = ../../qcocoacontrols
 
-TARGET = testapp
-TEMPLATE = app
-SOURCES += main.cpp mainwindow.cpp
-HEADERS  += mainwindow.h
-FORMS    += mainwindow.ui
-
-include(../cocoacontrols.pro)
-
+app.depends = qcocoacontrols

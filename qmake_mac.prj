@@ -1,0 +1,63 @@
+CONFIG += precompile_header
+CONFIG += c++11
+
+CONFIG(debug, debug|release) {
+    BUILD = debug
+    CONFIG += DEBUG
+}
+
+CONFIG(release, debug|release) {
+    BUILD = release
+    CONFIG += RELEASE
+}
+
+BUILD_DIR_NO_QT = "$$BUILD"
+
+contains(QT_ARCH, arm64) {
+    BUILD_DIR_NO_QT = "$$BUILD_DIR_NO_QT-arm"
+    QMAKE_APPLE_DEVICE_ARCHS=arm64
+}
+
+QMAKE_MAC_SDK = macosx11.1 # for Xcode 12
+CONFIG +=sdk_no_version_check
+
+!isEmpty( QT ) {
+    BUILD_DIR = "$$BUILD-$$QT_VERSION"
+
+    contains(QT_ARCH, arm64) {
+        BUILD_DIR = "$$BUILD_DIR-arm"
+    }
+
+    MOC_DIR = "$$BUILD_DIR/moc"
+    RCC_DIR = "$$BUILD_DIR/rcc"
+    UI_DIR = "$$BUILD_DIR/ui"
+
+    greaterThan (QT_MINOR_VERSION, 6) {
+        QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
+        CONFIG += QT_VERSION_MODERN
+    }
+    else {
+        QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
+    }
+}
+else {
+
+    BUILD_DIR = "$$BUILD_DIR_NO_QT"
+
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
+}
+
+OBJECTS_DIR = "$$BUILD_DIR/obj"
+DESTDIR = $$BUILD_DIR # can be overriden
+
+# QTDIR is used to correctly run 'deploy.sh'
+
+QTDIR = "/usr/local/Qt-$$QT_VERSION"
+
+contains(QT_ARCH, arm64) {
+    QTDIR = "$$QTDIR-arm"
+    CONFIG += ARCH_ARM
+}
+else {
+    CONFIG += ARCH_X86
+}

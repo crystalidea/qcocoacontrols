@@ -22,3 +22,5 @@ moc_*.h
 *.lib
 .DS_Store
 uic_wrapper.sh
+debug-*
+release-*

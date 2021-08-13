@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>694</width>
-    <height>431</height>
+    <width>865</width>
+    <height>603</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,9 +18,9 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tabSliders">
        <attribute name="title">
         <string>Slider</string>
        </attribute>
@@ -40,7 +40,7 @@
           <item>
            <widget class="QLabel" name="labelSliderValue">
             <property name="text">
-             <string>TextLabel</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -68,40 +68,47 @@
          </layout>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Vertical slider (try clicking with Option key pressed, it will move the knob by increment value of 10)</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_5"/>
         </item>
         <item>
-         <widget class="QCocoaSlider" name="sliderVertical" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="labelVertSlider">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Vertical slider:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCocoaSlider" name="sliderVertical" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelVertSlider">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <spacer name="verticalSpacer">
@@ -118,7 +125,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tabButtons">
        <attribute name="title">
         <string>Button</string>
        </attribute>
@@ -189,51 +196,79 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="Segmented">
+      <widget class="QWidget" name="tabSegmented">
        <attribute name="title">
         <string>Segmented Control</string>
        </attribute>
+       <widget class="QCocoaSegmentedButton" name="segmentedButton" native="true">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>90</y>
+          <width>120</width>
+          <height>80</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
-      <widget class="QWidget" name="tab_3">
+      <widget class="QWidget" name="tabGradient">
        <attribute name="title">
         <string>Gradient Button</string>
+       </attribute>
+       <widget class="QCocoaGradientButton" name="gradientButton" native="true">
+        <property name="geometry">
+         <rect>
+          <x>21</x>
+          <y>11</y>
+          <width>259</width>
+          <height>30</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tabPopover">
+       <attribute name="title">
+        <string>Popover</string>
        </attribute>
        <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
-          <x>20</x>
-          <y>10</y>
-          <width>261</width>
-          <height>26</height>
+          <x>21</x>
+          <y>11</y>
+          <width>235</width>
+          <height>33</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QComboBox" name="comboBox"/>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Timeout (ms):</string>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QCocoaGradientButton" name="gradientButton" native="true"/>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="layoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>22</x>
-          <y>50</y>
-          <width>258</width>
-          <height>214</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QTableWidget" name="tableWidget"/>
+          <widget class="QSpinBox" name="spinBoxPopover">
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>10000</number>
+           </property>
+           <property name="singleStep">
+            <number>1000</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QCocoaGradientButton" name="gradientWidget" native="true"/>
+          <widget class="QPushButton" name="buttonPopover">
+           <property name="text">
+            <string>Show</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -241,16 +276,6 @@
      </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>694</width>
-     <height>22</height>
-    </rect>
-   </property>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -260,26 +285,31 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
    <class>QCocoaSlider</class>
    <extends>QWidget</extends>
-   <header>../qcocoaslider.h</header>
+   <header>../../qcocoaslider.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>QCocoaButton</class>
    <extends>QWidget</extends>
-   <header>../qcocoabutton.h</header>
+   <header>../../qcocoabutton.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>QCocoaGradientButton</class>
    <extends>QWidget</extends>
-   <header>../qcocoagradientbutton.h</header>
+   <header>../../qcocoagradientbutton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QCocoaSegmentedButton</class>
+   <extends>QWidget</extends>
+   <header location="global">qcocoacontrols/qcocoasegmentedbutton.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

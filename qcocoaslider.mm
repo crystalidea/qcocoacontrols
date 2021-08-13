@@ -79,6 +79,8 @@ void QCocoaSlider::setSliderType(SliderType type /*= LinearHorizontal*/)
             break;
         case QCocoaSlider::LinearVertical:
             [ [pimpl->nsSlider cell] setSliderType:NSSliderTypeLinear];
+            pimpl->nsSlider.vertical = YES;
+
             setOrientation(Qt::Vertical);
             break;
         case QCocoaSlider::CircularSlider:

@@ -1,7 +1,40 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "../qcocoaslider.h"
+#include <qcocoacontrols/qcocoaslider.h>
+#include <qcocoacontrols/qcocoapopover.h>
+
+QWidget *popupContents()
+{
+    QWidget *w = new QWidget(0);
+
+    QLabel *label = new QLabel(w);
+    label->setText("Hello World");
+    label->setGeometry(0, 0, 200, 100);
+    label->setVisible(true);
+
+    QVBoxLayout *l = new QVBoxLayout();
+    w->setLayout(l);
+    l->addWidget(label);
+
+    QCocoaButton *btn = new QCocoaButton(w);
+     btn->setBezelStyle(QCocoaButton::TexturedRounded);
+    btn->setText("Close");
+
+    QObject::connect(btn, &QCocoaButton::clicked, w, [=] {
+
+       w->close();
+
+    });
+
+    l->addWidget(btn);
+
+    //w->adjustSize();
+
+    w->setGeometry(0, 0, 200, 200);
+
+    return w;
+}
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -9,8 +42,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // sliders
+
     connect(ui->sliderHorizontal, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
-    connect(ui->sliderVertical, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
     connect(ui->sliderCircular, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
 
     ui->sliderHorizontal->setRange(0, 100);
@@ -57,23 +91,42 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->buttonRoundedDisclosure->setBezelStyle(QCocoaButton::RoundedDisclosure);
 
-    ui->buttonInline->setBezelStyle(QCocoaButton::Inline);
+    //ui->buttonInline->setBezelStyle(QCocoaButton::Inline); // TODO: wtf CRASH !
     ui->buttonInline->setText("Inline");
 
     QCocoaButton *helpButton = new QCocoaButton(this);
     helpButton->setBezelStyle(QCocoaButton::HelpButton);
     ui->buttonBox->addButton(helpButton->abstractButton(), QDialogButtonBox::HelpRole);
 
+    // popover
+
+    QObject::connect(ui->buttonPopover, &QAbstractButton::clicked, this, [this] {
+        QWidget *w = popupContents();
+
+        QCocoaPopover *_popOver = new QCocoaPopover(this, w);
+
+        _popOver->setTimeout(ui->spinBoxPopover->value());
+
+        _popOver->setPopoverBehavior(QCocoaPopover::PopoverBehavior::ApplicationDefined);
+        _popOver->setAnimate(true);
+        //_popOver->setTimeout(8000);
+
+        _popOver->show(ui->buttonPopover);
+    });
+
     // GradientButton
 
     ui->gradientButton->setSegmentCount(2);
-    ui->gradientButton->setSegmentIcon(0, QCocoaWidget::Plus);
-    ui->gradientButton->setSegmentIcon(1, QCocoaWidget::Minus);
+    ui->gradientButton->setSegmentIcon(0, QCocoaIcon::Add);
+    ui->gradientButton->setSegmentIcon(1, QCocoaIcon::Remove);
 
-    ui->gradientWidget->setSegmentCount(2);
-    ui->gradientWidget->setSegmentIcon(0, QCocoaWidget::Plus);
-    ui->gradientWidget->setSegmentIcon(1, QCocoaWidget::Minus);
-    ui->gradientWidget->attachToWidget(ui->tableWidget); // must be after initializing
+    // segmented button
+
+    ui->segmentedButton->setSegmentCount(3);
+    ui->segmentedButton->setSegmentIcon(0, QCocoaIcon::StandardIcon::Add);
+    ui->segmentedButton->setTitle(1, "Btn1");
+    ui->segmentedButton->setTitle(2, "Btn2");
+
 }
 
 MainWindow::~MainWindow()

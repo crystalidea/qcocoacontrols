@@ -291,19 +291,19 @@
   <customwidget>
    <class>QCocoaSlider</class>
    <extends>QWidget</extends>
-   <header>../../qcocoaslider.h</header>
+   <header location="global">qcocoacontrols/qcocoaslider.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>QCocoaButton</class>
    <extends>QWidget</extends>
-   <header>../../qcocoabutton.h</header>
+   <header location="global">qcocoacontrols/qcocoabutton.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>QCocoaGradientButton</class>
    <extends>QWidget</extends>
-   <header>../../qcocoagradientbutton.h</header>
+   <header location="global">qcocoacontrols/qcocoagradientbutton.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

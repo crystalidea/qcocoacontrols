@@ -7,7 +7,6 @@
 
 #include <QVBoxLayout>
 
-Q_FORWARD_DECLARE_OBJC_CLASS(NSImage);
 Q_FORWARD_DECLARE_OBJC_CLASS(NSView);
 
 class QCocoaWidget : public QWidget
@@ -25,18 +24,15 @@ public:
 
 protected slots:
 
-    void setVisibleCustom(bool visible);
+
 
 protected:
 
-    virtual void showEvent(QShowEvent *event) override;
-    virtual void changeEvent(QEvent *event) override;
+    void changeEvent(QEvent *event) override;
 
 private:
 
     NSView *view;
-
-    bool m_bPlannedToBeInvisible; // most likely Qt shows the widget initially
 };
 
 #else

@@ -2,12 +2,12 @@
 
 #import "Foundation/Foundation.h"
 #import "AppKit/NSView.h"
-#import <AppKit/NSImage.h>
+#import "AppKit/NSControl.h"
 
 QCocoaWidget::QCocoaWidget(QWidget *parent) :
-    QWidget(parent), view(0), m_bPlannedToBeInvisible(false)
+    QWidget(parent), view(0)
 {
-    setProperty("setVisibleCustom", true); // for QWidgetHider
+
 }
 
 void QCocoaWidget::setupLayout(NSView *cocoaView)
@@ -30,27 +30,14 @@ QWidget *QCocoaWidget::nativeWidget() const
     return static_cast<QWidget *>(v->itemAt(0) ? v->itemAt(0)->widget() : nullptr);
 }
 
-void QCocoaWidget::setVisibleCustom(bool visible)
-{
-    if (view)
-        [view setHidden: visible ? NO : YES];
-
-    m_bPlannedToBeInvisible = !visible;
-}
-
-void QCocoaWidget::showEvent(QShowEvent *event)
-{
-    // upon startup if we'd want the widget to be displayed invisible
-    if (m_bPlannedToBeInvisible)
-        setVisibleCustom(false);
-
-    QWidget::showEvent(event);
-}
-
 void QCocoaWidget::changeEvent(QEvent *event)
 {
-    QWidget::changeEvent(event);
+    if ([view isKindOfClass:[NSControl class]])
+        [(NSControl *)view setEnabled: isEnabled() ? YES: NO];
+    else
+    {
+        // TODO ?
+    }
 
-    if ([view respondsToSelector:@selector(setEnabled:)])
-        [view setEnabled: isEnabled() ? YES: NO];
+    QWidget::changeEvent(event);
 }

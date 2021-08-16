@@ -38,8 +38,6 @@ public:
     {
         NSRect frame = [_nsButton frame];
 
-        [_nsButton setFrame:frame];
-
         if ([_nsButton imagePosition] == NSImageOnly)
             _cocoaButton->setFixedSize(FIXED_WIDTH_ICON_ONLY, FIXED_HEIGHT);
         else
@@ -51,17 +49,16 @@ public:
 
     NSMenuItem * insertOrGetTitleMenuItem()
     {
-        QMacAutoReleasePool pool;
-
         NSMenuItem *dummyItem = nullptr;
         NSPopUpButton *btn = static_cast<NSPopUpButton *>(getNSButton());
-        QCocoaButtonActionMenu *btnCocoa = static_cast<QCocoaButtonActionMenu *>(getButton());
 
         // insert dummy first item that will be visible as always displayed
         // https://stackoverflow.com/questions/2669242/a-popup-button-with-a-static-image-cocoa-osx
         // http://www.thecodedself.com/macOS-action-button-swift/
 
         NSMenu *menu = btn.menu;
+
+        Q_ASSERT(menu);
 
         if (menu)
         {
@@ -72,12 +69,11 @@ public:
 
             if (!dummyItem || [dummyItem tag] != dummyTag) // check if dummy doesn't exist or is already there
             {
-                // создадим меню с dummy элементом даже пока нет меню, чтобы на кнопке виден был текст (это title dummy элемента)
+                // create a dummy item if without a menu in order to have some text on a button (dummy button title)
 
-                dummyItem = [[NSMenuItem alloc] init];
+                dummyItem = [[[NSMenuItem alloc] init] autorelease];
                 [dummyItem setTag: dummyTag];
                 [menu insertItem: dummyItem atIndex: 0];
-                [dummyItem setTitle: btnCocoa->text().toNSString()];
             }
         }
 
@@ -97,34 +93,29 @@ QCocoaButtonActionMenu::QCocoaButtonActionMenu(QWidget *parent)
 
 void QCocoaButtonActionMenu::setMenu(QMenu *pMenu)
 {
-    CocoaButtonPrivateActionMenu *pimplMenu = static_cast<CocoaButtonPrivateActionMenu *>(pimpl.get());
+    QMacAutoReleasePool pool;
 
     NSPopUpButton *btn = static_cast<NSPopUpButton *>(pimpl->getNSButton());
 
     [btn setMenu: pMenu->toNSMenu()];
 
-    pimplMenu->insertOrGetTitleMenuItem();
-
-    pimpl->updateSize();
+    setText(text()); // create dummy item, update its text
 }
 
 void QCocoaButtonActionMenu::setText(const QString &text)
 {
-    if (_text != text)
+    QMacAutoReleasePool pool;
+
+    _text = text;
+
+    CocoaButtonPrivateActionMenu *pimplMenu = static_cast<CocoaButtonPrivateActionMenu *>(pimpl.get());
+
+    NSMenuItem *dummyItem = pimplMenu->insertOrGetTitleMenuItem();
+
+    if (dummyItem)
     {
-        QMacAutoReleasePool pool;
-
-        _text = text;
-
-        CocoaButtonPrivateActionMenu *pimplMenu = static_cast<CocoaButtonPrivateActionMenu *>(pimpl.get());
-
-        NSMenuItem *dummyItem = pimplMenu->insertOrGetTitleMenuItem();
-
-        if (dummyItem)
-        {
-            [dummyItem setTitle: _text.toNSString()];
-        }
-
-        pimpl->updateSize();
+        [dummyItem setTitle: _text.toNSString()];
     }
+
+    pimpl->updateSize();
 }

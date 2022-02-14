@@ -2,7 +2,7 @@
 
 The library helps to make use of native macOS controls in a Qt app. On Windows (and others?) it's supposed to provide a decent fallback.
 
-Tested with Qt 5 (5.6.x and Qt 5.15.x).
+Tested with Qt 5.6.x, Qt 5.15.x and Qt 6.2.x.
 
 Many of those controls are used in our [Macs Fan Control](https://crystalidea.com/macs-fan-control) and [AnyToISO](https://crystalidea.com/anytoiso) apps.
 

@@ -24,3 +24,5 @@ moc_*.h
 uic_wrapper.sh
 debug-*
 release-*
+Debug
+Release

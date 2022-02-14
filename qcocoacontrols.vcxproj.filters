@@ -3,47 +3,26 @@
   <ItemGroup>
     <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;cxx;c;def</Extensions>
-    </Filter>
-    <Filter Include="Generated Files">
-      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
-      <Extensions>moc;h;cpp</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
-    <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{9f054324-fa1a-4ff0-adba-49903675fe7b}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
-    <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{4e7c1783-c0ae-41b5-961d-6b1d20379796}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qcocoabox.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qcocoabutton.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qcocoagradientbutton.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoagradientbutton.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qcocoasegmentedbutton.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qcocoaslider.cpp">
-      <Filter>Generated Files\Debug</Filter>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="qcocoabutton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="qcocoagradientbutton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcocoapopover.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcocoapreferencesdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcocoapreferencesdialog_generic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="qcocoasegmentedbutton.cpp">
@@ -52,75 +31,53 @@
     <ClCompile Include="qcocoaslider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_qcocoacontrols.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="qcocoapreferencesdialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qcocoapreferencesdialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoapreferencesdialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="qcocoapreferencesdialog_generic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qcocoabuttonactionmenu.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoabox.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoabutton.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoaslider.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoasegmentedbutton.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qcocoabuttonactionmenu.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
+    <QtMoc Include="qcocoabox.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="qcocoabutton.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="qcocoabuttonactionmenu.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="qcocoagradientbutton.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="qcocoamessagebox.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="qcocoapopover.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="qcocoapreferencesdialog.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="qcocoasegmentedbutton.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="qcocoaslider.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="qcocoabutton_p.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="qcocoacontrols.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="qcocoaicon.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="qcocoabox.h">
+    <QtRcc Include="qcocoacontrols.qrc">
       <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="qcocoabutton.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="qcocoagradientbutton.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="qcocoasegmentedbutton.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="qcocoaslider.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="qcocoacontrols.qrc">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="qcocoapreferencesdialog.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="qcocoabuttonactionmenu.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
+    </QtRcc>
   </ItemGroup>
 </Project>

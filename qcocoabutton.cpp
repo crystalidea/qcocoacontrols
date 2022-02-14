@@ -33,7 +33,7 @@ QCocoaButton::QCocoaButton(QWidget *parent)
     pimpl.reset(new CocoaButtonPrivate(this, button));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(button);
 }
 

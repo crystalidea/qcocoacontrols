@@ -153,7 +153,11 @@ void QCocoaSegmentedButton::setTitle(int iSegment, const QString &aTitle)
 
     bool bCropped = false;
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
+    while (fm.horizontalAdvance(textCropped) > pimpl->m_pButtons[iSegment]->width())
+#else
     while (fm.width(textCropped) > pimpl->m_pButtons[iSegment]->width())
+#endif  
     {
         textCropped = textCropped.left(textCropped.size() - 1);
 

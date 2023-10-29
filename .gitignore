@@ -27,3 +27,6 @@ release-*
 Debug
 Release
 ._*
+
+Release Qt*
+Debug Qt*

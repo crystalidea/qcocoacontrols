@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "qcocoapopover.h"
 #include "qcocoamenubaritem.h"
 
@@ -103,9 +103,14 @@ public:
 
         if (msec)
         {
-            QTimer::singleShot(msec, this, [this]{
+            _timer = new QTimer(this);
+            _timer->setSingleShot(true);
+
+            QObject::connect(_timer, &QTimer::timeout, _timer, [this]{
                 close();
             } );
+
+            _timer->start(msec);
         }
     }
 
@@ -122,6 +127,12 @@ public:
         }
     }
 
+    void stopTimer()
+    {
+        if (_timer)
+            _timer->stop();
+    }
+
     void setPopoverBehavior(QCocoaPopover::PopoverBehavior b)
     {
         _popup.behavior = (NSPopoverBehavior)(b);
@@ -135,7 +146,8 @@ public:
 private:
 
     NSPopover *_popup = nullptr;
-    QCocoaPopover *_parent;
+    QCocoaPopover *_parent = nullptr;
+    QTimer *_timer = nullptr;
 };
 
 static const char *PROP_IS_POPOVER = "QCocoaPopover";
@@ -155,7 +167,7 @@ QCocoaPopover::~QCocoaPopover()
 
     p->close();
 
-    delete _contents;
+    _contents->deleteLater();
 }
 
 bool QCocoaPopover::eventFilter(QObject *obj, QEvent *event)
@@ -172,6 +184,10 @@ bool QCocoaPopover::eventFilter(QObject *obj, QEvent *event)
     else if (event->type() == QEvent::Close) // if user closed QWidget need to make sure that popup is closed as well
     {
         p->close();
+    }
+    else if (event->type() == QEvent::Enter)
+    {
+        p->stopTimer();
     }
 
     return false;

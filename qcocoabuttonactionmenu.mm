@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "qcocoabuttonactionmenu.h"
 #include "qcocoabutton_p.h"
 

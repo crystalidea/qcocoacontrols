@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "qcoregraphics.h"
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 7, 0))

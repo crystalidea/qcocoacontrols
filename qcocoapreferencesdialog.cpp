@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "qcocoapreferencesdialog.h"
 
 QCocoaPreferencesDialog::QCocoaPreferencesDialog(QWidget *parent, Qt::WindowFlags f) :

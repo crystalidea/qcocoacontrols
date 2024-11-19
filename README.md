@@ -2,13 +2,13 @@
 
 The library helps to make use of native macOS controls in a Qt app. On Windows (and others?) it's supposed to provide a decent fallback.
 
-Tested with Qt 5.6.x, Qt 5.15.x and Qt 6.2.x.
+Compatible with Qt 5 and Qt 6.
 
 Many of those controls are used in our [Macs Fan Control](https://crystalidea.com/macs-fan-control) and [AnyToISO](https://crystalidea.com/anytoiso) apps.
 
 The code is far from being ideal so you're welcome to contribute.
 
-To compile on macOS we use Qt Creator and Visual Studio 2019 Community on Windows
+To compile on macOS we use Qt Creator and Visual Studio 2022 Community on Windows
 
 #### linking on macOS
 

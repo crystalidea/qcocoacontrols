@@ -22,7 +22,14 @@ public:
         m_trackingMode = QCocoaSegmentedButton::NSSegmentSwitchTrackingSelectOne; // default
         m_Style = QCocoaSegmentedButton::SegmentStyleRounded; // default
 
-        connect(m_pSignalMapper, SIGNAL(mapped(int)), pParent, SIGNAL(clicked(int)));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QObject::connect(m_pSignalMapper, &QSignalMapper::mappedInt, pParent, [pParent](int i)
+        {
+            emit pParent->clicked(i);
+        });
+#else
+        QObject::connect(m_pSignalMapper, SIGNAL(mapped(int)), pParent, SIGNAL(clicked(int)));
+#endif
     }
 
     ~QCocoaSegmentedButtonPrivate()

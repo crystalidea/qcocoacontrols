@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "qcocoapreferencesdialog.h"
 
-#include <QtMacExtras>
-
 #import <AppKit/NSToolbar.h>
 #import <AppKit/NSToolbarItem.h>
 
@@ -12,7 +10,11 @@ class QCocoaPreferencesPrivate
 {
 public:
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    NSToolbar *nativeToolbar() const { return nullptr; }
+#else
     NSToolbar *nativeToolbar() const { return _macToolbar->nativeToolbar(); }
+#endif
 
     QMacToolBarBigSur *_macToolbar;
     QCocoaPreferencesDialog *_dialog;
@@ -23,7 +25,14 @@ QCocoaToolbarImpl::QCocoaToolbarImpl(QCocoaPreferencesDialog *parent)
 {
     _private = new QCocoaPreferencesPrivate();
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+
+#else
+
     _private->_macToolbar = new QMacToolBarBigSur(this);
+
+#endif
+
     _private->_dialog = parent;
 
     NSToolbar *nativeToolbar = _private->nativeToolbar();
@@ -32,10 +41,16 @@ QCocoaToolbarImpl::QCocoaToolbarImpl(QCocoaPreferencesDialog *parent)
 
 void QCocoaToolbarImpl::setButtonTitle(int nButton, const QString &title)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+
+#else
+
     Q_ASSERT(nButton < _private->_macToolbar->items().size());
 
     if (nButton < _private->_macToolbar->items().size())
         _private->_macToolbar->items().at(nButton)->setText(title);
+
+#endif
 }
 
 QCocoaToolbarImpl::~QCocoaToolbarImpl()
@@ -45,6 +60,10 @@ QCocoaToolbarImpl::~QCocoaToolbarImpl()
 
 void QCocoaToolbarImpl::addButton(QPreferencesPage *page, bool bLast)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+
+#else
+
     QMacAutoReleasePool pool;
 
     QMacToolBarItem *toolBarItem = _private->_macToolbar->addItem(page->getIcon(), page->getTitle());
@@ -60,10 +79,16 @@ void QCocoaToolbarImpl::addButton(QPreferencesPage *page, bool bLast)
 
         setSelectedButton(0); // now make the first item selected
     }
+
+#endif
 }
 
 void QCocoaToolbarImpl::setSelectedButton(int nButton)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+
+#else
+
     Q_ASSERT(nButton < _private->_macToolbar->items().size());
 
     if (nButton < _private->_macToolbar->items().size())
@@ -74,6 +99,8 @@ void QCocoaToolbarImpl::setSelectedButton(int nButton)
         NSToolbar *nativeToolbar = _private->nativeToolbar();
         [nativeToolbar setSelectedItemIdentifier:nativeToolBarItem.itemIdentifier];
     }
+
+#endif
 }
 
 int QCocoaToolbarImpl::getHeight() const

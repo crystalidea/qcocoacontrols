@@ -2,8 +2,6 @@
 #include "qcocoaicon.h"
 #include "qcoregraphics.h"
 
-#include <QtMacExtras>
-
 NSImage * QCocoaIcon::standardIcon(StandardIcon type)
 {
     NSString *nsImageName = nil;
@@ -63,7 +61,10 @@ QPixmap QCocoaIcon::standardIcon(StandardIcon type, int nSize)
 
         if (imageRef)
         {
-            pix = QtMac::fromCGImageRef(imageRef);
+            QImage img = CGImageToQImage(imageRef);
+
+            if (!img.isNull())
+                pix = QPixmap::fromImage(img);
 
             // The CGImageRef returned is guaranteed to live as long as the current autorelease pool.
             // The caller should not release the CGImage. This is the standard Cocoa convention, but people may not realize that it applies to CFTypes.
@@ -72,5 +73,61 @@ QPixmap QCocoaIcon::standardIcon(StandardIcon type, int nSize)
     }
 
     return pix;
+}
+
+// https://stackoverflow.com/questions/74747658/how-to-convert-a-cgimageref-to-a-qpixmap-in-qt-6
+
+CGBitmapInfo CGBitmapInfoForQImage(const QImage &image)
+{
+    CGBitmapInfo bitmapInfo = kCGImageAlphaNone;
+
+    switch (image.format()) {
+    case QImage::Format_ARGB32:
+        bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Host;
+        break;
+    case QImage::Format_RGB32:
+        bitmapInfo = kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Host;
+        break;
+    case QImage::Format_RGBA8888_Premultiplied:
+        bitmapInfo = kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big;
+        break;
+    case QImage::Format_RGBA8888:
+        bitmapInfo = kCGImageAlphaLast | kCGBitmapByteOrder32Big;
+        break;
+    case QImage::Format_RGBX8888:
+        bitmapInfo = kCGImageAlphaNoneSkipLast | kCGBitmapByteOrder32Big;
+        break;
+    case QImage::Format_ARGB32_Premultiplied:
+        bitmapInfo = kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host;
+        break;
+    default:
+        break;
+    }
+
+    return bitmapInfo;
+}
+
+QImage CGImageToQImage(CGImageRef cgImage)
+{
+    const size_t width = CGImageGetWidth(cgImage);
+    const size_t height = CGImageGetHeight(cgImage);
+    QImage image(width, height, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::transparent);
+
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+    CGContextRef context = CGBitmapContextCreate((void *)image.bits(), image.width(), image.height(), 8,
+                                                 image.bytesPerLine(), colorSpace, CGBitmapInfoForQImage(image));
+
+    // Scale the context so that painting happens in device-independent pixels
+    const qreal devicePixelRatio = image.devicePixelRatio();
+    CGContextScaleCTM(context, devicePixelRatio, devicePixelRatio);
+
+    CGRect rect = CGRectMake(0, 0, width, height);
+    CGContextDrawImage(context, rect, cgImage);
+
+    CFRelease(colorSpace);
+    CFRelease(context);
+
+    return image;
 }
 

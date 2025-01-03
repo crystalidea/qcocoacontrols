@@ -1,7 +1,11 @@
 #ifndef bigsurtoolbar_h
 #define bigsurtoolbar_h
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+using QMacToolBar = QToolBar;
+#else
 #include <QMacToolBar>
+#endif
 
 class QMacToolBarBigSur : public QMacToolBar
 {

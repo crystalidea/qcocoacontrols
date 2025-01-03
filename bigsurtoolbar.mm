@@ -32,8 +32,6 @@
 
 void QMacToolBarBigSur::attachToWindowWithStyle(QWindow *window, BigSurToolbarStyle style)
 {
-    QMacToolBar::attachToWindow(window);
-
     // getting actual NSWindow should be done with
     // NSWindow *macWindow = static_cast<NSWindow*>(
     // QGuiApplication::platformNativeInterface()->nativeResourceForWindow("nswindow", d->targetWindow));
@@ -42,7 +40,18 @@ void QMacToolBarBigSur::attachToWindowWithStyle(QWindow *window, BigSurToolbarSt
     NSView *view = reinterpret_cast<NSView*>(window->winId());
     NSWindow *macWindow = view.window;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+
+    // not yet
+
+#else
+
+    QMacToolBar::attachToWindow(window);
+
+#endif
+
     if (@available(macOS 11.0, *)) {
         macWindow.toolbarStyle = (NSWindowToolbarStyle)(style);
     }
+
 }

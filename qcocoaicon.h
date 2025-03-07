@@ -34,6 +34,8 @@ public:
     static QPixmap standardIcon(StandardIcon type, int nSize);
 };
 
+#ifdef Q_OS_MAC
 QImage CGImageToQImage(CGImageRef cgImage); // for Qt6, however there's QImage::toCGImage
+#endif
 
 #endif // QCOCOAICON_H

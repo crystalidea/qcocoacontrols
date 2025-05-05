@@ -94,7 +94,7 @@ QCocoaSegmentedButton::QCocoaSegmentedButton(QWidget *pParent /*= 0*/)
 
     NSSegmentedControl *segControl = [[NSSegmentedControl alloc] init];
 
-    pimpl = new QCocoaSegmentedButtonPrivate(segControl, this);
+    d_ptr = new QCocoaSegmentedButtonPrivate(segControl, this);
 
     [segControl setFont: [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize: NSControlSizeSmall]]];
 
@@ -116,11 +116,11 @@ QCocoaSegmentedButton::QCocoaSegmentedButton(QWidget *pParent /*= 0*/)
 
 void QCocoaSegmentedButton::setCustomCellWithoutMenuDelay()
 {
-    NSFont *font = [pimpl->control font]; // remember font
+    NSFont *font = [d_ptr->control font]; // remember font
 
-    [pimpl->control setCell: [[SegmentedCellWithoutMenuDelay alloc] init]];
+    [d_ptr->control setCell: [[SegmentedCellWithoutMenuDelay alloc] init]];
 
-    [pimpl->control setFont:font]; // restore
+    [d_ptr->control setFont:font]; // restore
 }
 
 QCocoaSegmentedButton::~QCocoaSegmentedButton()
@@ -129,65 +129,65 @@ QCocoaSegmentedButton::~QCocoaSegmentedButton()
 
 QSize QCocoaSegmentedButton::sizeHint() const
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return QSize();
 
-    NSRect frame = [pimpl->control frame];
+    NSRect frame = [d_ptr->control frame];
     return QSize(frame.size.width, frame.size.height);
 }
 
 void QCocoaSegmentedButton::setSegmentCount(int count)
 {
-    [pimpl->control setSegmentCount:count];
+    [d_ptr->control setSegmentCount:count];
 }
 
 void QCocoaSegmentedButton::setSegmentStyle(SegmentStyle style)
 {
-    [pimpl->control setSegmentStyle:(NSSegmentStyle)style];
+    [d_ptr->control setSegmentStyle:(NSSegmentStyle)style];
 }
 
 void QCocoaSegmentedButton::setSegmentTitle(int iSegment, const QString &strTitle)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return;
 
     QMacAutoReleasePool pool;
 
     QString s(strTitle);
-    [pimpl->control setLabel: s.remove('&').toNSString() forSegment: iSegment];
+    [d_ptr->control setLabel: s.remove('&').toNSString() forSegment: iSegment];
 
-    pimpl->updateSize();
+    d_ptr->updateSize();
 }
 
 void QCocoaSegmentedButton::setSegmentToolTip(int iSegment, const QString &strTip)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return;
 
     QMacAutoReleasePool pool;
 
-    [[pimpl->control cell] setToolTip: strTip.toNSString() forSegment: iSegment];
+    [[d_ptr->control cell] setToolTip: strTip.toNSString() forSegment: iSegment];
 }
 
 void QCocoaSegmentedButton::setSegmentIcon(int iSegment, const QIcon& icon)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return;
 
     NSImage *nsImage = QCocoaIcon::imageFromQIcon(icon);
 
     if (nsImage)
     {
-        [pimpl->control setImage: nsImage forSegment: iSegment];
+        [d_ptr->control setImage: nsImage forSegment: iSegment];
 
         [nsImage release];
     }
 
-    pimpl->updateSize();
+    d_ptr->updateSize();
 }
 
 void QCocoaSegmentedButton::setSegmentIcon(int iSegment, QCocoaIcon::StandardIcon icon)
@@ -195,83 +195,83 @@ void QCocoaSegmentedButton::setSegmentIcon(int iSegment, QCocoaIcon::StandardIco
     NSImage *nsImage = QCocoaIcon::standardIcon(icon);
 
     if (nsImage)
-        [pimpl->control setImage: nsImage forSegment: iSegment];
+        [d_ptr->control setImage: nsImage forSegment: iSegment];
 
-    pimpl->updateSize();
+    d_ptr->updateSize();
 }
 
 void QCocoaSegmentedButton::setSegmentMenu(int iSegment, QMenu *menu)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return;
 
-    if (menu && pimpl->control)
-        [pimpl->control setMenu:menu->toNSMenu() forSegment:iSegment];
+    if (menu && d_ptr->control)
+        [d_ptr->control setMenu:menu->toNSMenu() forSegment:iSegment];
 }
 
 void QCocoaSegmentedButton::setSegmentEnabled(int iSegment, bool fEnabled)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return;
 
-    [[pimpl->control cell] setEnabled: fEnabled forSegment: iSegment];
+    [[d_ptr->control cell] setEnabled: fEnabled forSegment: iSegment];
 }
 
 void QCocoaSegmentedButton::segmentAnimateClick(int iSegment)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return;
 
-    [pimpl->control setSelectedSegment: iSegment];
-    [[pimpl->control cell] performClick: pimpl->control];
+    [d_ptr->control setSelectedSegment: iSegment];
+    [[d_ptr->control cell] performClick: d_ptr->control];
 }
 
 void QCocoaSegmentedButton::setSegmentChecked(int nIndex, bool bChecked)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return;
 
     if (bChecked)
-        [pimpl->control setSelectedSegment:nIndex];
+        [d_ptr->control setSelectedSegment:nIndex];
 }
 
 bool QCocoaSegmentedButton::isSegmentChecked(int nIndex) const
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return false;
 
-    return [pimpl->control selectedSegment] == nIndex;
+    return [d_ptr->control selectedSegment] == nIndex;
 }
 
 void QCocoaSegmentedButton::setSegmentFixedWidth(int nSegment, int nWidth)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return;
 
-    [pimpl->control setWidth:nWidth forSegment:nSegment];
+    [d_ptr->control setWidth:nWidth forSegment:nSegment];
 }
 
 int QCocoaSegmentedButton::segmentWidth(int nSegment) const
 {
-    return [pimpl->control widthForSegment:nSegment];
+    return [d_ptr->control widthForSegment:nSegment];
 }
 
 int QCocoaSegmentedButton::segmentCount() const
 {
-    return [pimpl->control segmentCount];
+    return [d_ptr->control segmentCount];
 }
 
 void QCocoaSegmentedButton::setTrackingMode(SegmentSwitchTracking mode)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    Q_ASSERT(d_ptr);
+    if (!d_ptr)
         return;
 
-    [[pimpl->control cell] setTrackingMode: (NSSegmentSwitchTracking)mode];
+    [[d_ptr->control cell] setTrackingMode: (NSSegmentSwitchTracking)mode];
 }

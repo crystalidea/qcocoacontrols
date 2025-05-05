@@ -6,276 +6,325 @@
 
 class QCocoaSegmentedButtonPrivate : public QObject
 {
-protected:
-
-    QList<QToolButton*> m_pButtons;
-    QSignalMapper *m_pSignalMapper;
-    QPointer<QCocoaSegmentedButton> parent;
-    QCocoaSegmentedButton::SegmentSwitchTracking m_trackingMode;
-    QCocoaSegmentedButton::SegmentStyle m_Style;
+    //Q_OBJECT
 
 public:
-    QCocoaSegmentedButtonPrivate(QCocoaSegmentedButton *pParent)
-        : QObject(pParent), parent(pParent)
+    explicit QCocoaSegmentedButtonPrivate(QCocoaSegmentedButton* parentWidget)
+        : QObject(parentWidget),
+        parent(parentWidget),
+        trackingMode(QCocoaSegmentedButton::NSSegmentSwitchTrackingSelectOne),
+        style(QCocoaSegmentedButton::SegmentStyleRounded)
     {
-        m_pSignalMapper = new QSignalMapper(this);
-        m_trackingMode = QCocoaSegmentedButton::NSSegmentSwitchTrackingSelectOne; // default
-        m_Style = QCocoaSegmentedButton::SegmentStyleRounded; // default
-
+        signalMapper = new QSignalMapper(this);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        QObject::connect(m_pSignalMapper, &QSignalMapper::mappedInt, pParent, [pParent](int i)
-        {
-            emit pParent->clicked(i);
+        connect(signalMapper, &QSignalMapper::mappedInt, parentWidget,
+            [this](int index) {
+            bool isChecked = false;
+            if (index >= 0 && index < buttons.size()) {
+                isChecked = buttons[index]->isChecked();
+            }
+            emit parent->clicked(index, isChecked);
         });
 #else
-        QObject::connect(m_pSignalMapper, SIGNAL(mapped(int)), pParent, SIGNAL(clicked(int)));
+        connect(signalMapper, SIGNAL(mapped(int)), parentWidget, SLOT(onSegmentClicked(int)));
 #endif
+        layout = new QHBoxLayout(parentWidget);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
     }
 
     ~QCocoaSegmentedButtonPrivate()
     {
-        delete m_pSignalMapper;
-        qDeleteAll(m_pButtons);
+        // QSignalMapper will be deleted automatically.
+        qDeleteAll(buttons); // Also removes them from the layout
+        buttons.clear();
     }
 
-    friend class QCocoaSegmentedButton;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+private slots:
+    void onSegmentClicked(int index)
+    {
+        if (index >= 0 && index < buttons.size()) {
+            bool isChecked = buttons[index]->isChecked();
+            emit parent->clicked(index, isChecked);
+        }
+    }
+#endif
+
+public:
+    // Rebuild buttons to match `count`
+    void setSegmentCount(int count)
+    {
+        if (count < 0)
+            count = 0;
+
+        // If we have more buttons than needed, remove the extras
+        while (buttons.size() > count) {
+            QToolButton* btn = buttons.takeLast();
+            layout->removeWidget(btn);
+            delete btn;
+        }
+
+        // If we have fewer buttons, create new ones
+        while (buttons.size() < count) {
+            QToolButton* button = new QToolButton(parent);
+            button->setAutoRaise(true);
+            button->setFocusPolicy(Qt::TabFocus);
+            // The actual style (text/icon arrangement) will be set in updateButtonStyles()
+            connect(button, &QToolButton::clicked, signalMapper,
+                static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
+            buttons.append(button);
+            layout->addWidget(button);
+            signalMapper->setMapping(button, buttons.size() - 1);
+        }
+
+        updateButtonStyles();
+        updateTrackingMode();
+    }
+
+    void updateButtonStyles()
+    {
+        Qt::ToolButtonStyle tbStyle = Qt::ToolButtonTextBesideIcon;
+        if (style == QCocoaSegmentedButton::SegmentStyleSmallSquare) {
+            tbStyle = Qt::ToolButtonIconOnly;
+        }
+        // You can add logic here for other styles if needed
+        for (auto* btn : buttons) {
+            btn->setToolButtonStyle(tbStyle);
+        }
+    }
+
+    void updateTrackingMode()
+    {
+        bool autoExclusive = false;
+        bool checkable = true;
+        switch (trackingMode) {
+        case QCocoaSegmentedButton::NSSegmentSwitchTrackingSelectOne:
+            autoExclusive = true;
+            break;
+        case QCocoaSegmentedButton::NSSegmentSwitchTrackingSelectAny:
+            autoExclusive = false;
+            break;
+        case QCocoaSegmentedButton::NSSegmentSwitchTrackingMomentary:
+            checkable = false;
+            break;
+        }
+
+        for (auto* btn : buttons) {
+            btn->setAutoExclusive(autoExclusive);
+            btn->setCheckable(checkable);
+        }
+    }
+
+    QPointer<QCocoaSegmentedButton> parent;
+    QHBoxLayout* layout = nullptr;
+    QList<QToolButton*> buttons;
+    QSignalMapper* signalMapper = nullptr;
+    QCocoaSegmentedButton::SegmentSwitchTracking trackingMode;
+    QCocoaSegmentedButton::SegmentStyle style;
 };
 
-QCocoaSegmentedButton::QCocoaSegmentedButton(QWidget *pParent /*= 0*/)
-  : QCocoaWidget(pParent)
+QCocoaSegmentedButton::QCocoaSegmentedButton(QWidget* parent)
+    : QCocoaWidget(parent), d_ptr(new QCocoaSegmentedButtonPrivate(this))
 {
-    pimpl = new QCocoaSegmentedButtonPrivate(this);
-
-    setTrackingMode(NSSegmentSwitchTrackingSelectOne); // default
-    setSegmentStyle(SegmentStyleRounded); // default
-}
-
-void QCocoaSegmentedButton::setSegmentCount(int count)
-{
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setContentsMargins(QMargins(0, 0, 0, 0));
-    layout->setSpacing(0);
-
-    for (int i=0; i < count; ++i)
-    {
-        QToolButton *button = new QToolButton(this);
-        button->setAutoRaise(true);
-        button->setFocusPolicy(Qt::TabFocus);
-        
-        button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-
-        pimpl->m_pButtons.append(button);
-        layout->addWidget(button);
-        connect(button, SIGNAL(clicked()), pimpl->m_pSignalMapper, SLOT(map()));
-        pimpl->m_pSignalMapper->setMapping(button, i);
-    }
-
-    setTrackingMode(trackingMode()); // update tracking mode
-    setSegmentStyle(segmentStyle()); // update style
+    // Default setups
+    setTrackingMode(NSSegmentSwitchTrackingSelectOne);  // default
+    setSegmentStyle(SegmentStyleRounded);               // default
 }
 
 QCocoaSegmentedButton::~QCocoaSegmentedButton()
 {
-
+    int a = 1;
 }
 
-void QCocoaSegmentedButton::setSegmentToolTip(int iSegment, const QString &strTip)
+void QCocoaSegmentedButton::setSegmentCount(int count)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
-        return;
-
-    pimpl->m_pButtons.at(iSegment)->setToolTip(strTip);
+    if (!d_ptr) return;
+    d_ptr->setSegmentCount(count);
 }
 
-void QCocoaSegmentedButton::setSegmentIcon(int iSegment, const QIcon &icon)
+int QCocoaSegmentedButton::segmentCount() const
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
-        return;
+    if (!d_ptr) return 0;
+    return d_ptr->buttons.size();
+}
 
-    pimpl->m_pButtons.at(iSegment)->setIcon(icon);
+void QCocoaSegmentedButton::setSegmentToolTip(int index, const QString& tip)
+{
+    if (!d_ptr) return;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
+        return;
+    }
+    d_ptr->buttons[index]->setToolTip(tip);
+}
+
+void QCocoaSegmentedButton::setSegmentIcon(int index, const QIcon& icon)
+{
+    if (!d_ptr) return;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
+        return;
+    }
+    d_ptr->buttons[index]->setIcon(icon);
 }
 
 #ifdef Q_OS_MAC
-
-void QCocoaSegmentedButton::setSegmentIcon(int iSegment, CocoaStandardIcon icon)
+void QCocoaSegmentedButton::setSegmentIcon(int index, QCocoaIcon::StandardIcon icon)
 {
-    // Todo
+    // TODO: Provide Mac-specific standard icon logic
+    Q_UNUSED(index);
+    Q_UNUSED(icon);
 }
-
 #endif
 
-void QCocoaSegmentedButton::setSegmentMenu(int iSegment, QMenu *menu)
+void QCocoaSegmentedButton::setSegmentMenu(int index, QMenu* menu)
 {
-    // TOdo
+    if (!d_ptr) return;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
+        return;
+    }
+    d_ptr->buttons[index]->setMenu(menu);
+    // Typically you'd also call:
+    // d_ptr->buttons[index]->setPopupMode(QToolButton::InstantPopup);
+    // or a suitable popup mode for your use-case
 }
 
-void QCocoaSegmentedButton::setSegmentEnabled(int iSegment, bool fEnabled)
+void QCocoaSegmentedButton::setSegmentEnabled(int index, bool enabled)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    if (!d_ptr) return;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
         return;
-
-    pimpl->m_pButtons.at(iSegment)->setEnabled(fEnabled);
+    }
+    d_ptr->buttons[index]->setEnabled(enabled);
 }
 
-void QCocoaSegmentedButton::segmentAnimateClick(int iSegment)
+void QCocoaSegmentedButton::segmentAnimateClick(int index)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    if (!d_ptr) return;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
         return;
-
-    pimpl->m_pButtons.at(iSegment)->animateClick();
+    }
+    d_ptr->buttons[index]->animateClick();
 }
 
 QSize QCocoaSegmentedButton::sizeHint() const
 {
-    return QWidget::sizeHint();
+    // A simple approach is to sum the preferred widths/heights of our sub-buttons
+    // plus the layout spacing and margins.
+    if (!d_ptr) return QSize(100, 30); // fallback
+
+    int totalWidth = 0;
+    int maxHeight = 0;
+    for (auto* btn : d_ptr->buttons) {
+        QSize s = btn->sizeHint();
+        totalWidth += s.width();
+        maxHeight = qMax(maxHeight, s.height());
+    }
+    // plus spacing
+    int spacing = d_ptr->layout->spacing() * (d_ptr->buttons.size() - 1);
+    totalWidth += spacing;
+
+    QMargins margins = d_ptr->layout->contentsMargins();
+    totalWidth += margins.left() + margins.right();
+    maxHeight += margins.top() + margins.bottom();
+
+    return QSize(totalWidth, maxHeight);
 }
 
-void QCocoaSegmentedButton::setSegmentChecked(int nIndex, bool bChecked)
+void QCocoaSegmentedButton::setSegmentChecked(int index, bool checked)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    if (!d_ptr) return;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
         return;
-
-    if (nIndex < pimpl->m_pButtons.size())
-        pimpl->m_pButtons[nIndex]->setChecked(bChecked);
-}
-
-bool QCocoaSegmentedButton::isSegmentChecked(int nIndex) const
-{
-    if (nIndex < pimpl->m_pButtons.size())
-        return pimpl->m_pButtons[nIndex]->isChecked();
-
-    Q_ASSERT(0);
-
-    return false;
-}
-
-void QCocoaSegmentedButton::setSegmentTitle(int iSegment, const QString &aTitle)
-{
-    QString textCropped = aTitle;
-
-    static QFontMetrics fm(pimpl->m_pButtons[iSegment]->font());
-
-    bool bCropped = false;
-
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 11, 0))
-    while (fm.horizontalAdvance(textCropped) > pimpl->m_pButtons[iSegment]->width())
-#else
-    while (fm.width(textCropped) > pimpl->m_pButtons[iSegment]->width())
-#endif  
-    {
-        textCropped = textCropped.left(textCropped.size() - 1);
-
-        bCropped = true;
     }
 
-    if (bCropped)
-        textCropped = textCropped.left(textCropped.size() - 3) + "...";
-
-    pimpl->m_pButtons.at(iSegment)->setText(textCropped);
+    // If we are in SelectOne mode, checking this button may uncheck the others automatically
+    d_ptr->buttons[index]->setChecked(checked);
 }
 
-void QCocoaSegmentedButton::setSegmentFixedWidth(int nSegment, int nWidth)
+bool QCocoaSegmentedButton::isSegmentChecked(int index) const
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    if (!d_ptr) return false;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
+        return false;
+    }
+    return d_ptr->buttons[index]->isChecked();
+}
+
+void QCocoaSegmentedButton::setSegmentTitle(int index, const QString& title)
+{
+    if (!d_ptr) return;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
         return;
+    }
+    QToolButton* btn = d_ptr->buttons[index];
 
-    if (nSegment < pimpl->m_pButtons.size() && nSegment >= 0)
-        pimpl->m_pButtons[nSegment]->setFixedWidth(nWidth);
+    // Use elidedText to avoid manual substring / "..." issues.
+    QFontMetrics fm(btn->font());
+    QString elided = fm.elidedText(title, Qt::ElideRight, btn->width());
+    btn->setText(elided);
 }
 
-int QCocoaSegmentedButton::segmentWidth(int nSegment) const
+void QCocoaSegmentedButton::setSegmentFixedWidth(int index, int width)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    if (!d_ptr) return;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
+        return;
+    }
+    d_ptr->buttons[index]->setFixedWidth(width);
+}
+
+int QCocoaSegmentedButton::segmentWidth(int index) const
+{
+    if (!d_ptr) return -1;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
         return -1;
-
-    auto buttonsCount = pimpl->m_pButtons.size();
-
-    if (nSegment < pimpl->m_pButtons.size() && nSegment >= 0)
-        return pimpl->m_pButtons[nSegment]->width();
-
-    return -1;
+    }
+    return d_ptr->buttons[index]->width();
 }
 
-void QCocoaSegmentedButton::setSegmentFixedHeight(int nSegment, int nHeight)
+void QCocoaSegmentedButton::setSegmentFixedHeight(int index, int height)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
+    if (!d_ptr) return;
+    if (index < 0 || index >= d_ptr->buttons.size()) {
+        qWarning() << "Invalid segment index:" << index;
         return;
-
-    if (nSegment < pimpl->m_pButtons.size() && nSegment >= 0)
-        pimpl->m_pButtons[nSegment]->setFixedHeight(nHeight);
+    }
+    d_ptr->buttons[index]->setFixedHeight(height);
 }
 
 void QCocoaSegmentedButton::setTrackingMode(SegmentSwitchTracking mode)
 {
-    Q_ASSERT(pimpl);
-    if (!pimpl)
-        return;
-
-    if (pimpl->m_pButtons.size())
-    {
-        bool bAutoExclusive = false;
-        bool bCheckable = true;
-
-        switch (mode)
-        {
-            case NSSegmentSwitchTrackingSelectOne:
-            {
-                bAutoExclusive = true;
-
-                break;
-            }
-
-            case NSSegmentSwitchTrackingSelectAny:
-            {
-                break;
-            }
-
-            case NSSegmentSwitchTrackingMomentary:
-            {
-                bCheckable = false;
-
-                break;
-            }
-        }
-
-        for (int i = 0; i < pimpl->m_pButtons.size(); ++i)
-        {
-            pimpl->m_pButtons.at(i)->setAutoExclusive(bAutoExclusive);
-            pimpl->m_pButtons.at(i)->setCheckable(bCheckable);
-        }
-    }
-
-    pimpl->m_trackingMode = mode;
+    if (!d_ptr) return;
+    d_ptr->trackingMode = mode;
+    d_ptr->updateTrackingMode();
 }
 
 QCocoaSegmentedButton::SegmentSwitchTracking QCocoaSegmentedButton::trackingMode() const
 {
-    return pimpl->m_trackingMode;
+    if (!d_ptr) return NSSegmentSwitchTrackingSelectOne;
+    return d_ptr->trackingMode;
 }
 
 void QCocoaSegmentedButton::setSegmentStyle(SegmentStyle style)
 {
-    Qt::ToolButtonStyle buttonStyle = Qt::ToolButtonTextBesideIcon;
-
-    if (style == SegmentStyleSmallSquare)
-        buttonStyle = Qt::ToolButtonIconOnly;
-
-    for (auto btn : pimpl->m_pButtons)
-        btn->setToolButtonStyle(Qt::ToolButtonIconOnly);
-
-    pimpl->m_Style = style;
+    if (!d_ptr) return;
+    d_ptr->style = style;
+    d_ptr->updateButtonStyles();
 }
 
 QCocoaSegmentedButton::SegmentStyle QCocoaSegmentedButton::segmentStyle() const
 {
-    return pimpl->m_Style;
+    if (!d_ptr) return SegmentStyleRounded;
+    return d_ptr->style;
 }
 

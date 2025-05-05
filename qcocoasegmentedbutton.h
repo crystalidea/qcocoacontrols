@@ -84,7 +84,7 @@ private:
 #endif
 
     friend class QCocoaSegmentedButtonPrivate;
-    QPointer<QCocoaSegmentedButtonPrivate> pimpl;
+    QScopedPointer<QCocoaSegmentedButtonPrivate> d_ptr;
 };
 
 #endif // qcocoasegmentedbutton_h__

@@ -179,7 +179,8 @@
   <ItemGroup>
     <ClCompile Include="qcocoabutton.cpp" />
     <ClCompile Include="qcocoagradientbutton.cpp" />
-    <ClCompile Include="qcocoapopover.cpp" />
+    <ClCompile Include="qcocoapopover_generic.cpp" />
+    <ClCompile Include="qcocoapopover_generic_dialog.cpp" />
     <ClCompile Include="qcocoapreferencesdialog.cpp" />
     <ClCompile Include="qcocoapreferencesdialog_generic.cpp" />
     <ClCompile Include="qcocoasegmentedbutton.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="qcocoacontrols.h" />
     <ClInclude Include="qcocoaicon.h" />
     <ClInclude Include="pch.h" />
+    <QtMoc Include="qcocoapopover_generic_dialog.h" />
     <QtMoc Include="qcocoaslider.h" />
     <QtMoc Include="qcocoasegmentedbutton.h" />
     <QtMoc Include="qcocoapreferencesdialog.h" />

@@ -1,5 +1,4 @@
-#ifndef MenuBarIconPopover_h
-#define MenuBarIconPopover_h
+#pragma once
 
 class QCocoaPopoverPrivate;
 class QCocoaMenubarItem;
@@ -28,6 +27,7 @@ public:
 
     void show(QWidget *forWidget);
     void show(QCocoaMenubarItem *forMenuIcon);
+    void show(); // displays for the current cursor position
 
     void close();
 
@@ -56,5 +56,3 @@ private:
 
     friend class QCocoaPopoverPrivate;
 };
-
-#endif // MenuBarIconPopover_h

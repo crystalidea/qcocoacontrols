@@ -183,7 +183,7 @@
     <ClCompile Include="qcocoapopover_generic_dialog.cpp" />
     <ClCompile Include="qcocoapreferencesdialog.cpp" />
     <ClCompile Include="qcocoapreferencesdialog_generic.cpp" />
-    <ClCompile Include="qcocoasegmentedbutton.cpp">
+    <ClCompile Include="qcocoasegmentedbutton.cpp"/>
     <ClCompile Include="qcocoaslider.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'">Create</PrecompiledHeader>

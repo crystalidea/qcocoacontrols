@@ -23,7 +23,7 @@ public:
         SegmentStyleRoundRect = 3,
         SegmentStyleTexturedSquare = 4,
         SegmentStyleCapsule = 5,
-        SegmentStyleSmallSquare = 6,
+        SegmentStyleSmallSquare = 6, // matches Qt::ToolButtonIconOnly on systems other than macOS
     };
 
     // matches NSSegmentSwitchTracking
@@ -36,31 +36,36 @@ public:
     explicit QCocoaSegmentedButton(QWidget *pParent = nullptr);
     ~QCocoaSegmentedButton();
 
-    QSize sizeHint() const;
+    QSize sizeHint() const override;
 
     void setSegmentCount(int count);
     int segmentCount() const;
 
-    void setTitle(int iSegment, const QString &strTitle);
-    void setToolTip(int iSegment, const QString &strTip);
+    void setSegmentTitle(int iSegment, const QString &strTitle);
+    void setSegmentToolTip(int iSegment, const QString &strTip);
     void setSegmentIcon(int iSegment, const QIcon& icon);
 
+    void setSegmentFixedWidth(int nSegment, int nWidth);
+    int segmentWidth(int nSegment) const;
+
 #ifdef Q_OS_MAC
+
     void setSegmentIcon(int iSegment, QCocoaIcon::StandardIcon icon);
+
+#else
+
+    void setSegmentFixedHeight(int nSegment, int nHeight);
+
 #endif
 
     void setSegmentMenu(int iSegment, QMenu *menu);
 
-    void setEnabled(int iSegment, bool fEnabled);
+    void setSegmentEnabled(int iSegment, bool fEnabled);
 
-    void animateClick(int iSegment);
-    void onClicked(int iSegment);
+    void segmentAnimateClick(int iSegment);
 
-    void setChecked(int nIndex, bool bChecked);
-    bool isChecked(int nIndex) const;
-
-    void setFixedWidth(int nSegment, int nWidth);
-    int segmentWidth(int nSegment) const;
+    void setSegmentChecked(int nIndex, bool bChecked);
+    bool isSegmentChecked(int nIndex) const;
 
     void setTrackingMode(SegmentSwitchTracking mode);
     SegmentSwitchTracking trackingMode() const;
@@ -69,11 +74,14 @@ public:
     SegmentStyle segmentStyle() const;
 
 signals:
+
     void clicked(int iSegment, bool fChecked = false);
 
 private:
 
+#ifdef Q_OS_MAC
     void setCustomCellWithoutMenuDelay();
+#endif
 
     friend class QCocoaSegmentedButtonPrivate;
     QPointer<QCocoaSegmentedButtonPrivate> pimpl;

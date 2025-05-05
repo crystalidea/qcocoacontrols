@@ -61,7 +61,9 @@ void QCocoaSegmentedButton::setSegmentCount(int count)
         QToolButton *button = new QToolButton(this);
         button->setAutoRaise(true);
         button->setFocusPolicy(Qt::TabFocus);
+        
         button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
         pimpl->m_pButtons.append(button);
         layout->addWidget(button);
         connect(button, SIGNAL(clicked()), pimpl->m_pSignalMapper, SLOT(map()));
@@ -77,7 +79,7 @@ QCocoaSegmentedButton::~QCocoaSegmentedButton()
 
 }
 
-void QCocoaSegmentedButton::setToolTip(int iSegment, const QString &strTip)
+void QCocoaSegmentedButton::setSegmentToolTip(int iSegment, const QString &strTip)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -109,7 +111,7 @@ void QCocoaSegmentedButton::setSegmentMenu(int iSegment, QMenu *menu)
     // TOdo
 }
 
-void QCocoaSegmentedButton::setEnabled(int iSegment, bool fEnabled)
+void QCocoaSegmentedButton::setSegmentEnabled(int iSegment, bool fEnabled)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -118,7 +120,7 @@ void QCocoaSegmentedButton::setEnabled(int iSegment, bool fEnabled)
     pimpl->m_pButtons.at(iSegment)->setEnabled(fEnabled);
 }
 
-void QCocoaSegmentedButton::animateClick(int iSegment)
+void QCocoaSegmentedButton::segmentAnimateClick(int iSegment)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -132,7 +134,7 @@ QSize QCocoaSegmentedButton::sizeHint() const
     return QWidget::sizeHint();
 }
 
-void QCocoaSegmentedButton::setChecked(int nIndex, bool bChecked)
+void QCocoaSegmentedButton::setSegmentChecked(int nIndex, bool bChecked)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -142,7 +144,7 @@ void QCocoaSegmentedButton::setChecked(int nIndex, bool bChecked)
         pimpl->m_pButtons[nIndex]->setChecked(bChecked);
 }
 
-bool QCocoaSegmentedButton::isChecked(int nIndex) const
+bool QCocoaSegmentedButton::isSegmentChecked(int nIndex) const
 {
     if (nIndex < pimpl->m_pButtons.size())
         return pimpl->m_pButtons[nIndex]->isChecked();
@@ -152,7 +154,7 @@ bool QCocoaSegmentedButton::isChecked(int nIndex) const
     return false;
 }
 
-void QCocoaSegmentedButton::setTitle(int iSegment, const QString &aTitle)
+void QCocoaSegmentedButton::setSegmentTitle(int iSegment, const QString &aTitle)
 {
     QString textCropped = aTitle;
 
@@ -177,7 +179,7 @@ void QCocoaSegmentedButton::setTitle(int iSegment, const QString &aTitle)
     pimpl->m_pButtons.at(iSegment)->setText(textCropped);
 }
 
-void QCocoaSegmentedButton::setFixedWidth(int nSegment, int nWidth)
+void QCocoaSegmentedButton::setSegmentFixedWidth(int nSegment, int nWidth)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -185,6 +187,30 @@ void QCocoaSegmentedButton::setFixedWidth(int nSegment, int nWidth)
 
     if (nSegment < pimpl->m_pButtons.size() && nSegment >= 0)
         pimpl->m_pButtons[nSegment]->setFixedWidth(nWidth);
+}
+
+int QCocoaSegmentedButton::segmentWidth(int nSegment) const
+{
+    Q_ASSERT(pimpl);
+    if (!pimpl)
+        return -1;
+
+    auto buttonsCount = pimpl->m_pButtons.size();
+
+    if (nSegment < pimpl->m_pButtons.size() && nSegment >= 0)
+        return pimpl->m_pButtons[nSegment]->width();
+
+    return -1;
+}
+
+void QCocoaSegmentedButton::setSegmentFixedHeight(int nSegment, int nHeight)
+{
+    Q_ASSERT(pimpl);
+    if (!pimpl)
+        return;
+
+    if (nSegment < pimpl->m_pButtons.size() && nSegment >= 0)
+        pimpl->m_pButtons[nSegment]->setFixedHeight(nHeight);
 }
 
 void QCocoaSegmentedButton::setTrackingMode(SegmentSwitchTracking mode)
@@ -237,13 +263,13 @@ QCocoaSegmentedButton::SegmentSwitchTracking QCocoaSegmentedButton::trackingMode
 
 void QCocoaSegmentedButton::setSegmentStyle(SegmentStyle style)
 {
+    Qt::ToolButtonStyle buttonStyle = Qt::ToolButtonTextBesideIcon;
+
     if (style == SegmentStyleSmallSquare)
-    {
-        for (int i = 0; i < pimpl->m_pButtons.size(); ++i)
-        {
-            //setFixedWidth(i, 28);
-        }
-    }
+        buttonStyle = Qt::ToolButtonIconOnly;
+
+    for (auto btn : pimpl->m_pButtons)
+        btn->setToolButtonStyle(Qt::ToolButtonIconOnly);
 
     pimpl->m_Style = style;
 }

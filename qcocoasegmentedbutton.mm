@@ -29,7 +29,7 @@
 
 -(IBAction)segControlClicked:(id)sender
 {
-    mRealTarget->onClicked([sender selectedSegment]);
+    emit mRealTarget->clicked([sender selectedSegment], false);
 }
 @end
 
@@ -147,7 +147,7 @@ void QCocoaSegmentedButton::setSegmentStyle(SegmentStyle style)
     [pimpl->control setSegmentStyle:(NSSegmentStyle)style];
 }
 
-void QCocoaSegmentedButton::setTitle(int iSegment, const QString &strTitle)
+void QCocoaSegmentedButton::setSegmentTitle(int iSegment, const QString &strTitle)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -161,7 +161,7 @@ void QCocoaSegmentedButton::setTitle(int iSegment, const QString &strTitle)
     pimpl->updateSize();
 }
 
-void QCocoaSegmentedButton::setToolTip(int iSegment, const QString &strTip)
+void QCocoaSegmentedButton::setSegmentToolTip(int iSegment, const QString &strTip)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -210,7 +210,7 @@ void QCocoaSegmentedButton::setSegmentMenu(int iSegment, QMenu *menu)
         [pimpl->control setMenu:menu->toNSMenu() forSegment:iSegment];
 }
 
-void QCocoaSegmentedButton::setEnabled(int iSegment, bool fEnabled)
+void QCocoaSegmentedButton::setSegmentEnabled(int iSegment, bool fEnabled)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -219,7 +219,7 @@ void QCocoaSegmentedButton::setEnabled(int iSegment, bool fEnabled)
     [[pimpl->control cell] setEnabled: fEnabled forSegment: iSegment];
 }
 
-void QCocoaSegmentedButton::animateClick(int iSegment)
+void QCocoaSegmentedButton::segmentAnimateClick(int iSegment)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -229,12 +229,7 @@ void QCocoaSegmentedButton::animateClick(int iSegment)
     [[pimpl->control cell] performClick: pimpl->control];
 }
 
-void QCocoaSegmentedButton::onClicked(int iSegment)
-{
-    emit clicked(iSegment, false);
-}
-
-void QCocoaSegmentedButton::setChecked(int nIndex, bool bChecked)
+void QCocoaSegmentedButton::setSegmentChecked(int nIndex, bool bChecked)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -244,7 +239,7 @@ void QCocoaSegmentedButton::setChecked(int nIndex, bool bChecked)
         [pimpl->control setSelectedSegment:nIndex];
 }
 
-bool QCocoaSegmentedButton::isChecked(int nIndex) const
+bool QCocoaSegmentedButton::isSegmentChecked(int nIndex) const
 {
     Q_ASSERT(pimpl);
     if (!pimpl)
@@ -253,7 +248,7 @@ bool QCocoaSegmentedButton::isChecked(int nIndex) const
     return [pimpl->control selectedSegment] == nIndex;
 }
 
-void QCocoaSegmentedButton::setFixedWidth(int nSegment, int nWidth)
+void QCocoaSegmentedButton::setSegmentFixedWidth(int nSegment, int nWidth)
 {
     Q_ASSERT(pimpl);
     if (!pimpl)

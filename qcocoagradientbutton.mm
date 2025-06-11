@@ -63,7 +63,7 @@ QSize QCocoaGradientButton::sizeHint() const
 
         sz.setWidth(parentWidth);
 
-        p->setFixedWidth(segmentCount() - 1, parentWidth - pimpl->m_nWidthWithoutLastSegment);
+        p->setSegmentFixedWidth(segmentCount() - 1, parentWidth - pimpl->m_nWidthWithoutLastSegment);
     }
 
     return sz;
@@ -78,7 +78,7 @@ void QCocoaGradientButton::attachToWidget(QWidget *w)
 
     pimpl->m_nWidthWithoutLastSegment = sizeHint().width() + 1; // plus border (?)
     setSegmentCount(segmentCount() + 1);
-    setEnabled(segmentCount() - 1, false);
+    setSegmentEnabled(segmentCount() - 1, false);
 
     widgetToAttachedTo = w;
 

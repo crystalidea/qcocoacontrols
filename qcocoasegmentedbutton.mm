@@ -94,7 +94,7 @@ QCocoaSegmentedButton::QCocoaSegmentedButton(QWidget *pParent /*= 0*/)
 
     NSSegmentedControl *segControl = [[NSSegmentedControl alloc] init];
 
-    d_ptr = new QCocoaSegmentedButtonPrivate(segControl, this);
+    d_ptr.reset(new QCocoaSegmentedButtonPrivate(segControl, this));
 
     [segControl setFont: [NSFont controlContentFontOfSize:[NSFont systemFontSizeForControlSize: NSControlSizeSmall]]];
 

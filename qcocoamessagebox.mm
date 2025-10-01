@@ -6,6 +6,15 @@
 
 int processMessageBoxResult(NSAlert *alert, NSInteger retCode, QCocoaMessageBox *pMsgBox);
 
+// helper
+@interface QSheetStopper : NSObject @end
+@implementation QSheetStopper
++ (instancetype)shared { static QSheetStopper *s; static dispatch_once_t once; dispatch_once(&once, ^{ s = [QSheetStopper new]; }); return s; }
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)code contextInfo:(void *)ctx {
+    [NSApp stopModalWithCode:code];
+}
+@end
+
 int QCocoaMessageBox::exec()
 {
     // Make us the active application
@@ -51,7 +60,7 @@ int QCocoaMessageBox::exec()
 
     QList<QAbstractButton *> my_buttons = buttons();
 
-    for (QAbstractButton *btn : qAsConst(my_buttons) )
+    for (QAbstractButton *btn : std::as_const(my_buttons) )
     {
         QMessageBox::ButtonRole role = buttonRole(btn);
 
@@ -68,15 +77,21 @@ int QCocoaMessageBox::exec()
         NSView *view = reinterpret_cast<NSView*>(p->winId());
         NSWindow *wnd = [view window];
 
-        [alert beginSheetModalForWindow:wnd
-                      completionHandler:^(NSModalResponse returnCode)
-                      {
-                          [NSApp stopModalWithCode:returnCode]; // close modal loop
-                      }];
+        if ([alert respondsToSelector:@selector(beginSheetModalForWindow:completionHandler:)]) {
+            // 10.9+
+            [alert beginSheetModalForWindow:wnd
+                          completionHandler:^(NSInteger code) {
+                              [NSApp stopModalWithCode:code];
+                          }];
+        } else {
+            // 10.7–10.8
+            [alert beginSheetModalForWindow:wnd
+                              modalDelegate:[QSheetStopper shared]
+                             didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
+                                contextInfo:NULL];
+        }
 
-        // IMPORTANT: we use AppKit-modal loop instead of QEventLoop
-        retCode = [NSApp runModalForWindow:[alert window]];
-        // we don't call endSheet manually: NSAlert will remove the sheet on completionHandler
+        retCode = [NSApp runModalForWindow:[alert window]]; // uses AppKit, event loop not Qt
     }
     else
     {

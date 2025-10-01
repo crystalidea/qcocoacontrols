@@ -6,40 +6,6 @@
 
 int processMessageBoxResult(NSAlert *alert, NSInteger retCode, QCocoaMessageBox *pMsgBox);
 
-// CocoaMessageBoxHandler
-
-@interface CocoaMessageBoxHandler : NSObject {
-
-}
--(id)initWithLoop:(QEventLoop*)lp;
-@property (readonly, nonatomic, nonnull) QEventLoop *loop;
-@end
-
-@implementation CocoaMessageBoxHandler
-
-@synthesize loop;
-
--(id)initWithLoop:(QEventLoop*)lp
-{
-    self = [super init];
-
-    loop = lp;
-
-    return self;
-}
-
-- (void) alertDidEnd:(NSAlert *) alert returnCode:(NSInteger) returnCode contextInfo:(void *) contextInfo
-{
-    Q_UNUSED(contextInfo);
-    Q_UNUSED(alert);
-
-    [self loop]->exit( static_cast<int>(returnCode));
-}
-
-@end
-
-// end of CocoaMessageBoxHandler
-
 int QCocoaMessageBox::exec()
 {
     // Make us the active application
@@ -60,7 +26,7 @@ int QCocoaMessageBox::exec()
 
     if (icon() == QMessageBox::Critical)
         alert.alertStyle = NSAlertStyleCritical;
-    else if (!iconPixmap().isNull())  //NSAlertStyleWarning почему-то не меняет иконки  поэтому буду использовать этот метод
+    else if (!iconPixmap().isNull())  //NSAlertStyleWarning doesn't change icons for some reason so I won't use it
         alert.icon = QCocoaIcon::imageFromQIcon(iconPixmap());
 
     QCheckBox *checkBtn = checkBox();
@@ -77,13 +43,15 @@ int QCocoaMessageBox::exec()
         if (checkBtn->isChecked())
             [cell setState: NSOnState];
 
-        // если не указывать текст QCheckBox то будет дефолтный от macOS
+        // if we don't supply QCheckBox text, there will be a default one from macOS
 
         if (checkBtn->text().size())
             [cell setTitle: checkBtn->text().toNSString()];
     }
 
-    for (QAbstractButton *btn : buttons())
+    QList<QAbstractButton *> my_buttons = buttons();
+
+    for (QAbstractButton *btn : qAsConst(my_buttons) )
     {
         QMessageBox::ButtonRole role = buttonRole(btn);
 
@@ -93,26 +61,27 @@ int QCocoaMessageBox::exec()
             [addedButton setKeyEquivalent:[NSString stringWithFormat:@"%C", 0x1b]]; // Escape key
     }
 
-    NSModalResponse retCode = 0;
+    NSInteger retCode = NSModalResponseCancel;
 
-    if (QObject::parent())
+    if (QWidget *p = qobject_cast<QWidget*>(parent()))
     {
-        QEventLoop loop;
-
-        CocoaMessageBoxHandler *handler = [[CocoaMessageBoxHandler alloc] initWithLoop: &loop];
-
-        QWidget *parent = static_cast<QWidget *>( QObject::parent() );
-        NSView *view = reinterpret_cast<NSView *>( parent->winId());
+        NSView *view = reinterpret_cast<NSView*>(p->winId());
         NSWindow *wnd = [view window];
 
-        [alert beginSheetModalForWindow:wnd modalDelegate:handler didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil ];
+        [alert beginSheetModalForWindow:wnd
+                      completionHandler:^(NSModalResponse returnCode)
+                      {
+                          [NSApp stopModalWithCode:returnCode]; // close modal loop
+                      }];
 
-        retCode = loop.exec();
-
-        [handler release];
+        // IMPORTANT: we use AppKit-modal loop instead of QEventLoop
+        retCode = [NSApp runModalForWindow:[alert window]];
+        // we don't call endSheet manually: NSAlert will remove the sheet on completionHandler
     }
     else
+    {
         retCode = [alert runModal];
+    }
 
     return processMessageBoxResult(alert, retCode, this);
 }

@@ -1,6 +1,5 @@
+#include "pch.h" // QMacAutoReleasePool
 #include "qcocoaslider.h"
-
-#import <Foundation/NSAutoreleasePool.h>
 
 #import <AppKit/NSSlider.h>
 #import <AppKit/NSSliderCell.h>
@@ -52,7 +51,7 @@ public:
 
 QCocoaSlider::QCocoaSlider(QWidget * parent /*= 0*/) : QCocoaWidget(parent)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    QMacAutoReleasePool pool;
 
     NSSlider *slider = [[NSSlider alloc] init];
     pimpl = new QCocoaSliderPrivate(slider, this);
@@ -65,8 +64,6 @@ QCocoaSlider::QCocoaSlider(QWidget * parent /*= 0*/) : QCocoaWidget(parent)
     setupLayout(slider);
 
     [slider release];
-
-    [pool drain];
 }
 
 void QCocoaSlider::setSliderType(SliderType type /*= LinearHorizontal*/)

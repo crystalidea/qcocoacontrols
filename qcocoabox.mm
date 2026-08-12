@@ -3,8 +3,6 @@
 #import <AppKit/NSBox.h>
 #import <AppKit/NSSlider.h>
 
-#import <Foundation/NSAutoreleasePool.h>
-
 class QCocoaBoxPrivate : public QObject
 {
 protected:
@@ -26,7 +24,7 @@ public:
 
 QCocoaBox::QCocoaBox(QWidget * parent /*= 0*/) : QCocoaWidget(parent), contents(nullptr)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    QMacAutoReleasePool pool;
 
     NSBox *box = [[NSBox alloc] init];
     [box setBoxType:(NSBoxType)NSBoxPrimary];
@@ -37,8 +35,6 @@ QCocoaBox::QCocoaBox(QWidget * parent /*= 0*/) : QCocoaWidget(parent), contents(
     setMinimumHeight(1); // for NSBoxSeparator
 
     [box release];
-
-    [pool drain];
 }
 
 #define LEFT_RIGHT_MARGIN   10

@@ -3,20 +3,17 @@
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 
-    extern "C" {
-        void *objc_autoreleasePoolPush(void);
-        void objc_autoreleasePoolPop(void *pool);
-    }
+    #import <Foundation/NSAutoreleasePool.h>
 
     QMacAutoReleasePool::QMacAutoReleasePool()
-        : pool(objc_autoreleasePoolPush())
+        : pool([[NSAutoreleasePool alloc] init])
     {
 
     }
 
     QMacAutoReleasePool::~QMacAutoReleasePool()
     {
-        objc_autoreleasePoolPop(pool);
+        [static_cast<NSAutoreleasePool *>(pool) drain];
     }
 
 #endif

@@ -177,6 +177,8 @@ void QCocoaButton::setToolTip(const QString& strTip)
 
 void QCocoaButton::setMenu(QMenu *menu)
 {
+    QMacAutoReleasePool pool;
+
     NSMenu *m = menu->toNSMenu();
     NSEvent *event = [[NSApplication sharedApplication] currentEvent];
 

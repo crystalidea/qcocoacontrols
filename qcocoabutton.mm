@@ -199,5 +199,7 @@ QSize QCocoaButton::sizeHint() const
 
 QAbstractButton *QCocoaButton::abstractButton()
 {
+    // Deliberately unsound: this class is not a QAbstractButton. Safe only for handing to
+    // QDialogButtonBox::addButton() for placement. See the comment in qcocoabutton.h.
     return reinterpret_cast<QAbstractButton *>(this);
 }

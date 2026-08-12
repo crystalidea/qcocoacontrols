@@ -178,14 +178,12 @@ void QCocoaSegmentedButton::setSegmentIcon(int iSegment, const QIcon& icon)
     if (!d_ptr)
         return;
 
-    NSImage *nsImage = QCocoaIcon::imageFromQIcon(icon);
+    QMacAutoReleasePool pool; // bounds the peak when icons are set in a loop
+
+    NSImage *nsImage = QCocoaIcon::imageFromQIcon(icon); // autoreleased, must not be released here
 
     if (nsImage)
-    {
         [d_ptr->control setImage: nsImage forSegment: iSegment];
-
-        [nsImage release];
-    }
 
     d_ptr->updateSize();
 }
@@ -205,6 +203,8 @@ void QCocoaSegmentedButton::setSegmentMenu(int iSegment, QMenu *menu)
     Q_ASSERT(d_ptr);
     if (!d_ptr)
         return;
+
+    QMacAutoReleasePool pool;
 
     if (menu && d_ptr->control)
         [d_ptr->control setMenu:menu->toNSMenu() forSegment:iSegment];

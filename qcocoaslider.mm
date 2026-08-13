@@ -178,7 +178,13 @@ void QCocoaSlider::setTickInterval(int ti)
         return;
     }
 
-    int ticks = (int)ceil(double(maximum() - minimum()) / ti) + 1;
+    // Widen before subtracting: maximum() and minimum() are int, so a full-width
+    // range overflows in the subtraction itself. Round up with integer arithmetic
+    // rather than a double round-trip, and keep the result in NSInteger, which is
+    // what setNumberOfTickMarks: takes. An inverted range is clamped to a single tick.
+
+    const qint64 range = qMax<qint64>(0, qint64(maximum()) - qint64(minimum()));
+    const NSInteger ticks = NSInteger((range + ti - 1) / ti) + 1;
 
     [pimpl->nsSlider setNumberOfTickMarks: ticks];
 }

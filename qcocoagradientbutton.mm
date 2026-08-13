@@ -26,7 +26,7 @@ public:
 };
 
 QCocoaGradientButton::QCocoaGradientButton(QWidget *parent)
-    : QCocoaSegmentedButton(parent), widgetToAttachedTo(0)
+    : QCocoaSegmentedButton(parent), widgetToAttachedTo(nullptr)
 {
     setSegmentStyle(QCocoaSegmentedButton::SegmentStyleSmallSquare);
     setTrackingMode(QCocoaSegmentedButton::NSSegmentSwitchTrackingMomentary);

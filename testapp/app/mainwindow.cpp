@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // sliders
 
     connect(ui->sliderHorizontal, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
+    connect(ui->sliderVertical, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
     connect(ui->sliderCircular, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
 
     ui->sliderHorizontal->setRange(0, 100);
@@ -124,8 +125,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->segmentedButton->setSegmentCount(3);
     ui->segmentedButton->setSegmentIcon(0, QCocoaIcon::StandardIcon::Add);
-    ui->segmentedButton->setTitle(1, "Btn1");
-    ui->segmentedButton->setTitle(2, "Btn2");
+    ui->segmentedButton->setSegmentTitle(1, "Btn1");
+    ui->segmentedButton->setSegmentTitle(2, "Btn2");
 
 }
 

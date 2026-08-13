@@ -32,7 +32,7 @@ private:
 
     friend class QCocoaGradientButtonPrivate;
     QPointer<QCocoaGradientButtonPrivate> pimpl;
-    QWidget *widgetToAttachedTo;
+    QPointer<QWidget> widgetToAttachedTo; // not owned, may die before us -- sizeHint() dereferences it
 };
 
 #endif // qcocoagradientbutton_h__

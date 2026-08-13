@@ -75,7 +75,7 @@ void QCocoaPreferencesDialog::setCurrentPage(int nButton, bool bAnimate)
                 animation->setDuration(150);
                 animation->setStartValue(size());
                 animation->setEndValue(targetSize);
-                animation->start();
+                animation->start(QAbstractAnimation::DeleteWhenStopped); // 'this' is the target, not the parent
             }
             else {
                 QWidget::resize(targetSize);

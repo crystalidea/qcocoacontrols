@@ -1,6 +1,5 @@
+#include "pch.h" // QMacAutoReleasePool
 #include "qcocoaslider.h"
-
-#import <Foundation/NSAutoreleasePool.h>
 
 #import <AppKit/NSSlider.h>
 #import <AppKit/NSSliderCell.h>
@@ -52,7 +51,7 @@ public:
 
 QCocoaSlider::QCocoaSlider(QWidget * parent /*= 0*/) : QCocoaWidget(parent)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    QMacAutoReleasePool pool;
 
     NSSlider *slider = [[NSSlider alloc] init];
     pimpl = new QCocoaSliderPrivate(slider, this);
@@ -65,8 +64,18 @@ QCocoaSlider::QCocoaSlider(QWidget * parent /*= 0*/) : QCocoaWidget(parent)
     setupLayout(slider);
 
     [slider release];
+}
 
-    [pool drain];
+// -[NSSlider setVertical:] was only added in 10.12. Before that NSSlider had a
+// read-only isVertical returning NSInteger and no setter at all -- the orientation
+// followed the frame aspect ratio -- so sending it on 10.7-10.11 is an unrecognized
+// selector. Where the setter exists it must be kept in sync in BOTH directions,
+// because an explicitly set property overrides that frame aspect heuristic.
+
+static void setNSSliderVertical(NSSlider *slider, BOOL vertical)
+{
+    if ([slider respondsToSelector:@selector(setVertical:)])
+        slider.vertical = vertical;
 }
 
 void QCocoaSlider::setSliderType(SliderType type /*= LinearHorizontal*/)
@@ -75,11 +84,13 @@ void QCocoaSlider::setSliderType(SliderType type /*= LinearHorizontal*/)
     {
         case QCocoaSlider::LinearHorizontal:
             [ [pimpl->nsSlider cell] setSliderType:NSSliderTypeLinear];
+            setNSSliderVertical(pimpl->nsSlider, NO);
+
             setOrientation(Qt::Horizontal);
             break;
         case QCocoaSlider::LinearVertical:
             [ [pimpl->nsSlider cell] setSliderType:NSSliderTypeLinear];
-            pimpl->nsSlider.vertical = YES;
+            setNSSliderVertical(pimpl->nsSlider, YES);
 
             setOrientation(Qt::Vertical);
             break;
@@ -158,7 +169,22 @@ void QCocoaSlider::setAltIncrementValue(int increment)
 
 void QCocoaSlider::setTickInterval(int ti)
 {
-    int ticks = ceil((maximum() - minimum()) / ti) + 1;
+    // NSSlider wants a tick count, not an interval. Qt treats a zero interval as "no ticks";
+    // dividing by it here would be undefined behaviour (SIGFPE on Intel).
+
+    if (ti <= 0)
+    {
+        [pimpl->nsSlider setNumberOfTickMarks: 0];
+        return;
+    }
+
+    // Widen before subtracting: maximum() and minimum() are int, so a full-width
+    // range overflows in the subtraction itself. Round up with integer arithmetic
+    // rather than a double round-trip, and keep the result in NSInteger, which is
+    // what setNumberOfTickMarks: takes. An inverted range is clamped to a single tick.
+
+    const qint64 range = qMax<qint64>(0, qint64(maximum()) - qint64(minimum()));
+    const NSInteger ticks = NSInteger((range + ti - 1) / ti) + 1;
 
     [pimpl->nsSlider setNumberOfTickMarks: ticks];
 }

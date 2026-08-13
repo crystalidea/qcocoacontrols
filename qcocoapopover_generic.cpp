@@ -51,6 +51,18 @@ QCocoaPopover::QCocoaPopover(QObject* parent, QWidget* contents)
 QCocoaPopover::~QCocoaPopover()
 {
     close();  // ensure it's closed
+
+    // The dialog is created without a parent (the first QPopoverDialog argument is the content,
+    // not the parent), so nobody owns it -- popoverDialog is only a QPointer. Delete it here; it
+    // reparented _contents into itself, so that goes with it. If show() was never called there is
+    // no dialog and _contents is still ours. Either way this honours the ownership rule documented
+    // in qcocoapopover.h and matches what the mac implementation does.
+
+    if (p->popoverDialog)
+        delete p->popoverDialog;
+    else
+        delete _contents;
+
     // p is a QScopedPointer, it will delete itself.
 }
 

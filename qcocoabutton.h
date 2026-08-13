@@ -82,7 +82,29 @@ public:
 
     QSize sizeHint() const override;
 
-    QAbstractButton *abstractButton(); // helper method when you need to insert QCocoaButton into QDialogButtonBox
+    // Helper for inserting a QCocoaButton into a QDialogButtonBox, which accepts nothing but
+    // QAbstractButton *. READ THIS BEFORE USING IT:
+    //
+    // On macOS the returned pointer is a lie. QCocoaButton derives from QWidget, not from
+    // QAbstractButton, so abstractButton() just reinterpret_casts 'this'. It happens to work
+    // because the QWidget subobject sits at offset 0, which makes the pointer value correct for
+    // everything QDialogButtonBox actually does with it: setParent(), layout()->addWidget() and
+    // the connect() to QObject::destroyed.
+    //
+    // What you must NOT do on macOS is call any QAbstractButton method on the result -- setText(),
+    // isChecked(), setShortcut(), setCheckable() and friends all start with Q_D(QAbstractButton),
+    // which would run over a QWidgetPrivate and read/write past the end of it.
+    //
+    // Also note that QDialogButtonBox's own connect to QAbstractButton::clicked is silently dead
+    // here: the signal index it computes belongs to QAbstractButton, while this class emits its
+    // own clicked() at a different index. So accepted()/rejected()/helpRequested() will never fire
+    // for such a button -- connect to QCocoaButton::clicked directly instead. In other words, the
+    // button box can lay this button out, but it cannot manage it.
+    //
+    // On other platforms the returned pointer is a real QPushButton owned by this widget, so none
+    // of the above applies -- but QDialogButtonBox::addButton() will reparent it out of the
+    // QCocoaButton, leaving the wrapper empty.
+    QAbstractButton *abstractButton();
 
 signals:
     void clicked(bool checked = false);

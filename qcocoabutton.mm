@@ -76,10 +76,13 @@ void QCocoaButton::setBezelStyle(BezelStyle bezelStyle)
     switch(bezelStyle) {
         case QCocoaButton::Recessed:
             [pimpl->getNSButton() setButtonType:NSPushOnPushOffButton];
+            break;
         case QCocoaButton::Disclosure:
             [pimpl->getNSButton() setButtonType:NSOnOffButton];
+            break;
         default:
             [pimpl->getNSButton() setButtonType:NSMomentaryPushInButton];
+            break;
     }
 
     [pimpl->getNSButton() setBezelStyle:(NSBezelStyle)bezelStyle];
@@ -174,6 +177,8 @@ void QCocoaButton::setToolTip(const QString& strTip)
 
 void QCocoaButton::setMenu(QMenu *menu)
 {
+    QMacAutoReleasePool pool;
+
     NSMenu *m = menu->toNSMenu();
     NSEvent *event = [[NSApplication sharedApplication] currentEvent];
 
@@ -194,5 +199,7 @@ QSize QCocoaButton::sizeHint() const
 
 QAbstractButton *QCocoaButton::abstractButton()
 {
+    // Deliberately unsound: this class is not a QAbstractButton. Safe only for handing to
+    // QDialogButtonBox::addButton() for placement. See the comment in qcocoabutton.h.
     return reinterpret_cast<QAbstractButton *>(this);
 }

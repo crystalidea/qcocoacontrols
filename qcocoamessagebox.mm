@@ -107,8 +107,8 @@ int processMessageBoxResult(NSAlert *alert, NSInteger retCode, QCocoaMessageBox 
 
     QCheckBox *checkBtn = pMsgBox->checkBox();
 
-    if (checkBtn && [[alert suppressionButton] state] == NSOnState)
-        checkBtn->setChecked(true);
+    if (checkBtn) // mirror unconditionally, the user may have unchecked a pre-checked box
+        checkBtn->setChecked([[alert suppressionButton] state] == NSOnState);
 
     QAbstractButton *btn = nullptr;
 

@@ -72,6 +72,8 @@ void QCocoaSlider::setSliderType(SliderType type /*= LinearHorizontal*/)
     {
         case QCocoaSlider::LinearHorizontal:
             [ [pimpl->nsSlider cell] setSliderType:NSSliderTypeLinear];
+            pimpl->nsSlider.vertical = NO; // an explicitly set property overrides the frame aspect heuristic
+
             setOrientation(Qt::Horizontal);
             break;
         case QCocoaSlider::LinearVertical:
@@ -155,7 +157,16 @@ void QCocoaSlider::setAltIncrementValue(int increment)
 
 void QCocoaSlider::setTickInterval(int ti)
 {
-    int ticks = ceil((maximum() - minimum()) / ti) + 1;
+    // NSSlider wants a tick count, not an interval. Qt treats a zero interval as "no ticks";
+    // dividing by it here would be undefined behaviour (SIGFPE on Intel).
+
+    if (ti <= 0)
+    {
+        [pimpl->nsSlider setNumberOfTickMarks: 0];
+        return;
+    }
+
+    int ticks = (int)ceil(double(maximum() - minimum()) / ti) + 1;
 
     [pimpl->nsSlider setNumberOfTickMarks: ticks];
 }

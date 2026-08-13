@@ -36,13 +36,14 @@ public:
 
     void updateSize() override
     {
-        NSRect frame = [_nsButton frame];
-
         if ([_nsButton imagePosition] == NSImageOnly)
             _cocoaButton->setFixedSize(FIXED_WIDTH_ICON_ONLY, FIXED_HEIGHT);
         else
         {
-            [_nsButton sizeToFit];
+            [_nsButton sizeToFit]; // must come before reading the frame, otherwise the width is one update behind
+
+            NSRect frame = [_nsButton frame];
+
             _cocoaButton->setFixedSize(NSWidth(frame), FIXED_HEIGHT);
         }
     }

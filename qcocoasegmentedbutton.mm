@@ -51,6 +51,9 @@ public:
 
     ~QCocoaSegmentedButtonPrivate()
     {
+        [[control target] release]; // -setTarget: does not retain, so we own the target
+        [control setTarget:nil];
+
         [control release];
     }
 
@@ -118,7 +121,7 @@ void QCocoaSegmentedButton::setCustomCellWithoutMenuDelay()
 {
     NSFont *font = [d_ptr->control font]; // remember font
 
-    [d_ptr->control setCell: [[SegmentedCellWithoutMenuDelay alloc] init]];
+    [d_ptr->control setCell: [[[SegmentedCellWithoutMenuDelay alloc] init] autorelease]]; // -setCell: retains
 
     [d_ptr->control setFont:font]; // restore
 }

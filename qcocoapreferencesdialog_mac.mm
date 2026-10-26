@@ -98,7 +98,17 @@ public:
     {
         _delegate = [[QCocoaPreferencesToolbarDelegate alloc] init];
 
-        _toolbar = [[NSToolbar alloc] initWithIdentifier:@"QCocoaPreferencesToolbar"];
+        // AppKit keeps toolbars with the same identifier in sync: an item inserted
+        // into one is inserted into all the others, and if one of them already has
+        // an item with that identifier, it throws. Two preference dialogs may be
+        // alive at once, so each one gets a toolbar identifier of its own.
+
+        static unsigned long toolbarCount = 0;
+
+        NSString *identifier = [[NSString alloc] initWithFormat:@"QCocoaPreferencesToolbar%lu", ++toolbarCount];
+        _toolbar = [[NSToolbar alloc] initWithIdentifier:identifier];
+        [identifier release];
+
         _toolbar.delegate = _delegate;
         _toolbar.allowsUserCustomization = NO;
         _toolbar.autosavesConfiguration = NO;
@@ -139,6 +149,7 @@ public:
         if (window.toolbar != _toolbar)
             window.toolbar = _toolbar;
 
+        _toolbarLoaded = true;
         window.toolbarStyle = NSWindowToolbarStylePreference;
     }
 
@@ -153,6 +164,7 @@ public:
     QCocoaPreferencesDialog *_dialog;
     QCocoaPreferencesToolbarDelegate *_delegate;
     NSToolbar *_toolbar;
+    bool _toolbarLoaded = false; // the toolbar has been in a window and took its items from the delegate
 };
 
 QCocoaToolbarImpl::QCocoaToolbarImpl(QCocoaPreferencesDialog *parent)
@@ -193,6 +205,13 @@ void QCocoaToolbarImpl::addButton(QPreferencesPage *page, bool bLast)
 
     [items addObject:item];
     [item release];
+
+    // NSToolbar asks the delegate for its items once, when it is first put into a
+    // window, and does not ask again, not even when it is put into a window anew.
+    // A page added after that gets its button only if it is inserted here.
+
+    if (_private->_toolbarLoaded)
+        [_private->_toolbar insertItemWithItemIdentifier:identifier atIndex:NSInteger(_private->_toolbar.items.count)];
 
     if (bLast)
     {

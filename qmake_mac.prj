@@ -6,13 +6,15 @@
 # source tree. The helper functions and cross-project library paths of
 # that file are deliberately left out -- they only make sense there.
 #
-# Build directory naming, architecture detection, deployment targets and
-# warning switches ARE kept identical to it, so both files resolve to the
-# same paths and a build configured half by one and half by the other
-# still finds the library. The language level is deliberately C++17 here
-# (nothing in this library needs more) where the internal file uses
+# Build directory naming, the deployment target and the compiler switches
+# ARE kept identical to it, so both files resolve to the same paths and a
+# build configured half by one and half by the other still finds the
+# library. Two differences are deliberate. The language level is C++17
+# here (nothing in this library needs more) where the internal file uses
 # C++20, so do not reuse one build directory across the two without
-# cleaning it first.
+# cleaning it first. And the architecture is detected from Qt here, while
+# the internal file always builds the slices of its prebuilt third-party
+# tree (arm64 debug, universal release).
 ########################################################################
 
 CONFIG += precompile_header
@@ -27,11 +29,15 @@ CONFIG(release, debug|release) {
     CONFIG += RELEASE
 }
 
+lessThan(QT_MAJOR_VERSION, 6) {
+    error("qcocoacontrols requires Qt 6, this is Qt $$QT_VERSION")
+}
+
 ########################################################################
 # detect an arm build of Qt
 #
 # qmake itself is always arm64 on Apple Silicon even when Qt was built
-# for x86_64, so ask a tool that is not qmake. Works on Qt 5 and Qt 6.
+# for x86_64, so ask a tool that is not qmake.
 ########################################################################
 
 MACDEPLOYQT = $$[QT_INSTALL_BINS]/macdeployqt
@@ -40,36 +46,29 @@ ARM_BUILD_TEST = $$system(lipo -info $$shell_quote($$MACDEPLOYQT) 2>/dev/null)
 
 # macdeployqt is missing from minimal Qt installs and the probe also fails on
 # install paths containing spaces. An empty result must NOT be read as "Qt is
-# x86_64" -- that would force -arch x86_64 onto an arm64 Qt and fail at link
-# time with no hint why. Fall back to the architecture Qt reports about itself.
+# x86_64" -- that would force x86_64 onto an arm64 Qt and fail at link time
+# with no hint why. Fall back to the architectures Qt reports about itself:
+# QT_ARCHS lists every slice of a multi-architecture Qt, QT_ARCH only one.
 
-isEmpty(ARM_BUILD_TEST): ARM_BUILD_TEST = $$QT_ARCH
+isEmpty(ARM_BUILD_TEST): ARM_BUILD_TEST = $$QT_ARCHS $$QT_ARCH
 
 contains(ARM_BUILD_TEST, arm64) {
 
     RELEASE {
-        CONFIG += ARCH_UNIVERSAL
         CPU_ARCH = arm64_x86_64
 
         QMAKE_APPLE_DEVICE_ARCHS = arm64 x86_64
     }
     DEBUG {
-        CONFIG += ARCH_ARM64
         CPU_ARCH = arm64
 
         QMAKE_APPLE_DEVICE_ARCHS = arm64 # arm64 alone is enough for a debug build and compiles faster
     }
 }
 else {
-    CONFIG += ARCH_X86
     CPU_ARCH = x86_64
 
-    # when compiling on arm hardware, these must be specified
-    QMAKE_CXXFLAGS += "-arch x86_64"
-    QMAKE_CFLAGS += "-arch x86_64"
-    QMAKE_LFLAGS += "-arch x86_64"
-
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-enum-constexpr-conversion # otherwise - lots of warnings in Qt headers
+    QMAKE_APPLE_DEVICE_ARCHS = x86_64
 }
 
 ########################################################################
@@ -86,7 +85,7 @@ else {
 CONFIG += sdk_no_version_check
 
 ########################################################################
-# build directories and language level
+# build directories, deployment target and language level
 ########################################################################
 
 BUILD_DIR_NO_QT = "$$BUILD-$$CPU_ARCH"
@@ -97,34 +96,21 @@ BUILD_DIR_NO_QT = "$$BUILD-$$CPU_ARCH"
     MOC_DIR = "$$BUILD_DIR/moc"
     RCC_DIR = "$$BUILD_DIR/rcc"
     UI_DIR = "$$BUILD_DIR/ui"
-
-    greaterThan(QT_MAJOR_VERSION, 5) {
-        # Qt 6 builds
-
-        QMAKE_MACOSX_DEPLOYMENT_TARGET = 12 # required by Qt 6.8; earlier 6.x would allow a lower target
-        CONFIG += c++17
-    }
-    else {
-        # Qt 5 builds
-
-        CONFIG += c++17
-
-        greaterThan(QT_MINOR_VERSION, 6) {
-            # Qt 5.15 build
-            QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
-            CONFIG += QT_VERSION_MODERN
-        } else {
-            # Qt 5.6 build
-            QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
-        }
-    }
 }
 else {
-    CONFIG += c++17
     BUILD_DIR = "$$BUILD_DIR_NO_QT"
-
-    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
 }
+
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 12 # required by Qt 6.8
+CONFIG += c++17
+
+# Apple clang 21 (Xcode 26.4 and later) reports __yield as a builtin on arm64
+# but leaves it undeclared without <arm_acle.h>, so qyieldcpu.h of Qt 6.8 does
+# not compile. The error is not raised inside system headers, hence the Qt
+# include directory is passed with -isystem as well, the way CMake does it.
+
+QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
+QMAKE_CFLAGS += -isystem $$[QT_INSTALL_HEADERS]
 
 OBJECTS_DIR = "$$BUILD_DIR/obj"
 DESTDIR = $$BUILD_DIR # can be overridden
@@ -134,16 +120,8 @@ DESTDIR = $$BUILD_DIR # can be overridden
 
 QMAKE_CXXFLAGS += "-o $$OBJECTS_DIR"
 
-equals(QMAKE_MACOSX_DEPLOYMENT_TARGET, 10.7) { # required to support 10.7, otherwise the minimum is 10.9
-    QMAKE_LFLAGS += "-stdlib=libc++"
-
-    CONFIG += c++1z # C++17 support for Qt 5.6.3, which does not know the c++17 spelling
-
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-copy-with-user-provided-copy
-}
-
 # static libraries related stuff
 
 staticlib {
-    CONFIG += no_warn_empty_obj_files # doesn't work for Qt 5.6.3
+    CONFIG += no_warn_empty_obj_files
 }

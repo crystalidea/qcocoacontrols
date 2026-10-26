@@ -7,13 +7,6 @@
 int processMessageBoxResult(NSAlert *alert, NSInteger retCode, QCocoaMessageBox *pMsgBox);
 
 // helper
-@interface QSheetStopper : NSObject @end
-@implementation QSheetStopper
-+ (instancetype)shared { static QSheetStopper *s; static dispatch_once_t once; dispatch_once(&once, ^{ s = [QSheetStopper new]; }); return s; }
-- (void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)code contextInfo:(void *)ctx {
-    [NSApp stopModalWithCode:code];
-}
-@end
 
 int QCocoaMessageBox::exec()
 {
@@ -50,7 +43,7 @@ int QCocoaMessageBox::exec()
         [cell setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
 
         if (checkBtn->isChecked())
-            [cell setState: NSOnState];
+            [cell setState: NSControlStateValueOn];
 
         // if we don't supply QCheckBox text, there will be a default one from macOS
 
@@ -77,19 +70,10 @@ int QCocoaMessageBox::exec()
         NSView *view = reinterpret_cast<NSView*>(p->winId());
         NSWindow *wnd = [view window];
 
-        if ([alert respondsToSelector:@selector(beginSheetModalForWindow:completionHandler:)]) {
-            // 10.9+
-            [alert beginSheetModalForWindow:wnd
-                          completionHandler:^(NSInteger code) {
-                              [NSApp stopModalWithCode:code];
-                          }];
-        } else {
-            // 10.7–10.8
-            [alert beginSheetModalForWindow:wnd
-                              modalDelegate:[QSheetStopper shared]
-                             didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
-                                contextInfo:NULL];
-        }
+        [alert beginSheetModalForWindow:wnd
+                      completionHandler:^(NSInteger code) {
+                          [NSApp stopModalWithCode:code];
+                      }];
 
         retCode = [NSApp runModalForWindow:[alert window]]; // uses AppKit, event loop not Qt
     }
@@ -108,7 +92,7 @@ int processMessageBoxResult(NSAlert *alert, NSInteger retCode, QCocoaMessageBox 
     QCheckBox *checkBtn = pMsgBox->checkBox();
 
     if (checkBtn) // mirror unconditionally, the user may have unchecked a pre-checked box
-        checkBtn->setChecked([[alert suppressionButton] state] == NSOnState);
+        checkBtn->setChecked([[alert suppressionButton] state] == NSControlStateValueOn);
 
     QAbstractButton *btn = nullptr;
 

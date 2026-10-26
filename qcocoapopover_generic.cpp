@@ -90,13 +90,9 @@ void QCocoaPopover::show()
     y = cursorPos.y() - popSize.height();
 
     // Now clamp to screen:
-#if QT_VERSION >= QT_VERSION_CHECK(5,10,0)
     QScreen* screen = QGuiApplication::screenAt(cursorPos);
     QRect screenGeom = screen ? screen->availableGeometry()
         : QGuiApplication::primaryScreen()->availableGeometry();
-#else
-    QRect screenGeom = QApplication::desktop()->availableGeometry(cursorPos);
-#endif
 
     // Clamp horizontally
     if (x < screenGeom.left()) {

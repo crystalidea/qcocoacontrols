@@ -2,7 +2,7 @@
 
 The library helps to make use of native macOS controls in a Qt app. On Windows (and others?) it's supposed to provide a decent fallback.
 
-Compatible with Qt 5 and Qt 6.
+Requires Qt 6 (we build it with Qt 6.8) and macOS 12 or later.
 
 Many of those controls are used in our [Macs Fan Control](https://crystalidea.com/macs-fan-control) and [AnyToISO](https://crystalidea.com/anytoiso) apps.
 
@@ -16,7 +16,7 @@ Being a static library by default, qcocoacontrols requires the '-ObjC' flag to b
 
 ``` +[NSImage imageFromQIcon:]: unrecognized selector sent to class 0x7fff8d90cbb0```
 
-The reason for that are customizations for the existing **NSImage** class and bringing those to the target app is not enabled by default ([More info](https://stackoverflow.com/questions/2567498/objective-c-categories-in-static-library)). Actually in our case it wasn't actually required when using Qt 5.15 but for Qt 5.6 - yes. Adding linker flags can be done by appending them to LIBS in your .pro file:
+The reason for that are customizations for the existing **NSImage** class and bringing those to the target app is not enabled by default ([More info](https://stackoverflow.com/questions/2567498/objective-c-categories-in-static-library)). Adding linker flags can be done by appending them to LIBS in your .pro file:
 
 ``` LIBS += -Llib_path -lqcocoacontrols -ObjC```
 

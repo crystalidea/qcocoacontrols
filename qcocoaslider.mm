@@ -66,16 +66,13 @@ QCocoaSlider::QCocoaSlider(QWidget * parent /*= 0*/) : QCocoaWidget(parent)
     [slider release];
 }
 
-// -[NSSlider setVertical:] was only added in 10.12. Before that NSSlider had a
-// read-only isVertical returning NSInteger and no setter at all -- the orientation
-// followed the frame aspect ratio -- so sending it on 10.7-10.11 is an unrecognized
-// selector. Where the setter exists it must be kept in sync in BOTH directions,
-// because an explicitly set property overrides that frame aspect heuristic.
+// An explicitly set vertical property overrides the frame aspect ratio heuristic
+// NSSlider otherwise uses for the orientation, so it is kept in sync in BOTH
+// directions.
 
 static void setNSSliderVertical(NSSlider *slider, BOOL vertical)
 {
-    if ([slider respondsToSelector:@selector(setVertical:)])
-        slider.vertical = vertical;
+    slider.vertical = vertical;
 }
 
 void QCocoaSlider::setSliderType(SliderType type /*= LinearHorizontal*/)

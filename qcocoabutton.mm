@@ -75,13 +75,13 @@ void QCocoaButton::setBezelStyle(BezelStyle bezelStyle)
 
     switch(bezelStyle) {
         case QCocoaButton::Recessed:
-            [pimpl->getNSButton() setButtonType:NSPushOnPushOffButton];
+            [pimpl->getNSButton() setButtonType:NSButtonTypePushOnPushOff];
             break;
         case QCocoaButton::Disclosure:
-            [pimpl->getNSButton() setButtonType:NSOnOffButton];
+            [pimpl->getNSButton() setButtonType:NSButtonTypeOnOff];
             break;
         default:
-            [pimpl->getNSButton() setButtonType:NSMomentaryPushInButton];
+            [pimpl->getNSButton() setButtonType:NSButtonTypeMomentaryPushIn];
             break;
     }
 

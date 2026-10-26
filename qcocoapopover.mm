@@ -27,8 +27,6 @@ static int EventPopoverClosed = QEvent::User + 1;
 
     NSView *nativeWidgetView = reinterpret_cast<NSView *>(_contents->winId());
 
-#if (QT_VERSION > QT_VERSION_CHECK(5, 6, 3)) // assumption
-
     // this NSWindow hack basically detaches NSView from QWidget
     // and doesn't let top level QWidget to be displayed as a window
 
@@ -40,17 +38,6 @@ static int EventPopoverClosed = QEvent::User + 1;
     [window release];
 
     _contents->show();
-
-#else // honestly I only checked this to be working fine on Qt 5.6
-
-    // this trick disables displaying of another top-level window
-
-    _contents->setAttribute(Qt::WA_NativeWindow, true); // must be set to access QWindow
-
-    _contents->show();
-    _contents->windowHandle()->setVisible(false);
-
-#endif
 
     [self setView:nativeWidgetView];
 }

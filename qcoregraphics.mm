@@ -1,25 +1,6 @@
 #include "pch.h"
 #include "qcoregraphics.h"
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 7, 0))
-
-    // this adds const to non-const objects (like std::as_const)
-    template <typename T>
-    Q_DECL_CONSTEXPR typename std::add_const<T>::type &qAsConst(T &t) noexcept { return t; }
-    // prevent rvalue arguments:
-    template <typename T>
-    void qAsConst(const T &&) = delete;
-
-    // like std::exchange
-    template <typename T, typename U = T>
-    Q_DECL_RELAXED_CONSTEXPR T qExchange(T &t, U &&newValue)
-    {
-        T old = std::move(t);
-        t = std::forward<U>(newValue);
-        return old;
-    }
-#endif
-
 template <typename T, typename U, U (*RetainFunction)(U), void (*ReleaseFunction)(U)>
 class QAppleRefCounted
 {
@@ -31,7 +12,7 @@ public:
     QAppleRefCounted(QAppleRefCounted &&other)
             noexcept(std::is_nothrow_move_assignable<T>::value &&
                      std::is_nothrow_move_constructible<T>::value)
-        : value(qExchange(other.value, T())) {}
+        : value(std::exchange(other.value, T())) {}
     QAppleRefCounted(const QAppleRefCounted &other) : value(other.value) { if (value) RetainFunction(value); }
     ~QAppleRefCounted() { if (value) ReleaseFunction(value); }
     operator T() const { return value; }
@@ -76,71 +57,13 @@ public:
     }
 };
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
-    #define QImage2CGImageRef(img) img.toCGImage()
-    #define QSize2CGSize(sz) sz.toCGSize()
-#else
-    #define QImage2CGImageRef(img) toCGImage(img)
-    #define QSize2CGSize(sz) CGSizeMake(sz.width(), sz.height())
-
-    CGBitmapInfo qt_mac_bitmapInfoForImage(const QImage &image)
-    {
-        CGBitmapInfo bitmapInfo = kCGImageAlphaNone;
-        switch (image.format()) {
-        case QImage::Format_ARGB32:
-            bitmapInfo = kCGImageAlphaFirst | kCGBitmapByteOrder32Host;
-            break;
-        case QImage::Format_RGB32:
-            bitmapInfo = kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Host;
-            break;
-        case QImage::Format_RGBA8888_Premultiplied:
-            bitmapInfo = kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big;
-            break;
-        case QImage::Format_RGBA8888:
-            bitmapInfo = kCGImageAlphaLast | kCGBitmapByteOrder32Big;
-            break;
-        case QImage::Format_RGBX8888:
-            bitmapInfo = kCGImageAlphaNoneSkipLast | kCGBitmapByteOrder32Big;
-            break;
-        case QImage::Format_ARGB32_Premultiplied:
-            bitmapInfo = kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host;
-            break;
-        default: break;
-        }
-        return bitmapInfo;
-    }
-
-    CGImageRef toCGImage(const QImage &img)
-    {
-        if (img.isNull())
-            return nil;
-        CGBitmapInfo bitmapInfo = qt_mac_bitmapInfoForImage(img);
-        // Format not supported: return nil CGImageRef
-        if (bitmapInfo == kCGImageAlphaNone)
-            return nil;
-        // Create a data provider that owns a copy of the QImage and references the image data.
-        auto deleter = [](void *image, const void *, size_t)
-                       { delete static_cast<QImage *>(image); };
-        QCFType<CGDataProviderRef> dataProvider =
-            CGDataProviderCreateWithData(new QImage(img), img.bits(), img.byteCount(), deleter);
-        QCFType<CGColorSpaceRef> colorSpace =  CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
-        const size_t bitsPerComponent = 8;
-        const size_t bitsPerPixel = 32;
-        const CGFloat *decode = nullptr;
-        const bool shouldInterpolate = false;
-        return CGImageCreate(img.width(), img.height(), bitsPerComponent, bitsPerPixel,
-                             img.bytesPerLine(), colorSpace, bitmapInfo, dataProvider,
-                             decode, shouldInterpolate, kCGRenderingIntentDefault);
-    }
-#endif
-
 @implementation NSImage (QtExtras)
 + (instancetype)imageFromQImage:(const QImage &)image
 {
     if (image.isNull())
         return nil;
 
-    QCFType<CGImageRef> cgImage = QImage2CGImageRef(image);
+    QCFType<CGImageRef> cgImage = image.toCGImage();
     if (!cgImage)
         return nil;
 
@@ -151,7 +74,7 @@ public:
     // NSImage.
     auto nsImage = [[NSImage alloc] initWithSize:NSZeroSize];
     auto *imageRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
-    imageRep.size = QSize2CGSize((image.size() / image.devicePixelRatioF()));
+    imageRep.size = (image.size() / image.devicePixelRatioF()).toCGSize();
     [nsImage addRepresentation:[imageRep autorelease]];
     Q_ASSERT(CGSizeEqualToSize(nsImage.size, imageRep.size));
 
@@ -180,12 +103,12 @@ public:
         if (image.isNull())
             continue;
 
-        QCFType<CGImageRef> cgImage = QImage2CGImageRef(image);
+        QCFType<CGImageRef> cgImage = image.toCGImage();
         if (!cgImage)
             continue;
 
         auto *imageRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
-        imageRep.size = QSize2CGSize((image.size() / image.devicePixelRatioF()));
+        imageRep.size = (image.size() / image.devicePixelRatioF()).toCGSize();
         [nsImage addRepresentation:[imageRep autorelease]];
     }
 

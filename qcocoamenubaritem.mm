@@ -17,21 +17,7 @@ public:
     {
         Q_ASSERT( [item isKindOfClass:[NSStatusItem class]] );
 
-        // [NSStatusItem button] was added in 10.10, but before that there was a private _button selector
-        if ((floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9))
-            statusItemButton = statusItem.button;
-        else
-        {
-            typedef NSButton * (*buttonSelector)(id, SEL);
-
-            SEL selector = NSSelectorFromString(@"_button");
-
-            if ([statusItem respondsToSelector:selector]) {
-                IMP imp = [statusItem methodForSelector:selector];
-                buttonSelector func = reinterpret_cast<buttonSelector>(imp);
-                statusItemButton = func(statusItem, selector);
-            }
-        }
+        statusItemButton = statusItem.button;
 
         Q_ASSERT(statusItemButton);
     }

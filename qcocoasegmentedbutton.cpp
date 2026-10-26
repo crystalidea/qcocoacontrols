@@ -16,7 +16,6 @@ public:
         style(QCocoaSegmentedButton::SegmentStyleRounded)
     {
         signalMapper = new QSignalMapper(this);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         connect(signalMapper, &QSignalMapper::mappedInt, parentWidget,
             [this](int index) {
             bool isChecked = false;
@@ -25,9 +24,6 @@ public:
             }
             emit parent->clicked(index, isChecked);
         });
-#else
-        connect(signalMapper, SIGNAL(mapped(int)), parentWidget, SLOT(onSegmentClicked(int)));
-#endif
         layout = new QHBoxLayout(parentWidget);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
@@ -39,17 +35,6 @@ public:
         qDeleteAll(buttons); // Also removes them from the layout
         buttons.clear();
     }
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-private slots:
-    void onSegmentClicked(int index)
-    {
-        if (index >= 0 && index < buttons.size()) {
-            bool isChecked = buttons[index]->isChecked();
-            emit parent->clicked(index, isChecked);
-        }
-    }
-#endif
 
 public:
     // Rebuild buttons to match `count`

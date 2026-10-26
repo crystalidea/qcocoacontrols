@@ -109,8 +109,8 @@ CONFIG += c++17
 # not compile. The error is not raised inside system headers, hence the Qt
 # include directory is passed with -isystem as well, the way CMake does it.
 
-QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
-QMAKE_CFLAGS += -isystem $$[QT_INSTALL_HEADERS]
+QMAKE_CXXFLAGS += -isystem $$shell_quote($$[QT_INSTALL_HEADERS])
+QMAKE_CFLAGS += -isystem $$shell_quote($$[QT_INSTALL_HEADERS])
 
 OBJECTS_DIR = "$$BUILD_DIR/obj"
 DESTDIR = $$BUILD_DIR # can be overridden

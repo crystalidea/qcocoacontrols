@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "qcocoabuttonactionmenu.h"
 #include "qcocoabutton_p.h"
+#include "qcocoaappearance.h"
 
 #import <AppKit/NSPopUpButton.h>
 #import <AppKit/NSPopUpButtonCell.h>
@@ -36,7 +37,18 @@ public:
 
     void updateSize() override
     {
-        if ([_nsButton imagePosition] == NSImageOnly)
+        // The fixed sizes below fit the classic toolbar bezel. Under Liquid Glass the button is 24 pt tall and needs
+        // 63 pt for an icon with its arrow: the fixed sizes would make it taller than the controls next to it and
+        // squeeze the icon-only one, so it gets the size it asks for
+        if (QCocoaAppearance::isLiquidGlass())
+        {
+            [_nsButton sizeToFit];
+
+            const NSRect frame = [_nsButton frame];
+
+            _cocoaButton->setFixedSize(qCeil(NSWidth(frame)), qCeil(NSHeight(frame)));
+        }
+        else if ([_nsButton imagePosition] == NSImageOnly)
             _cocoaButton->setFixedSize(FIXED_WIDTH_ICON_ONLY, FIXED_HEIGHT);
         else
         {
@@ -119,4 +131,24 @@ void QCocoaButtonActionMenu::setText(const QString &text)
     }
 
     pimpl->updateSize();
+}
+
+int QCocoaButtonActionMenu::widthForText(const QString &text) const
+{
+    QMacAutoReleasePool pool;
+
+    NSPopUpButton *btn = static_cast<NSPopUpButton *>(pimpl->getNSButton());
+
+    // measured on a button of its own with the same look: retitling this one would show on screen
+    NSPopUpButton *probe = [[[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:YES] autorelease];
+    probe.bezelStyle = (NSBezelStyle)_bezelStyle;
+    probe.font = btn.font;
+
+    NSPopUpButtonCell *probeCell = probe.cell;
+    [probeCell setUsesItemFromMenu: YES];
+
+    [probe.menu addItemWithTitle:text.toNSString() action:nil keyEquivalent:@""];
+    [probe sizeToFit];
+
+    return qCeil(NSWidth(probe.frame));
 }

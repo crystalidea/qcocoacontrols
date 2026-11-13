@@ -20,6 +20,12 @@ The reason for that are customizations for the existing **NSImage** class and br
 
 ``` LIBS += -Llib_path -lqcocoacontrols -ObjC```
 
+#### Liquid Glass (macOS 26 and later)
+
+`QCocoaAppearance::design()` tells which design AppKit gives the process: Liquid Glass with macOS 26 and later for an app built against the macOS 26 SDK or later, unless it is built against an SDK older than 27 and sets `UIDesignRequiresCompatibility` in its Info.plist. The controls of the library follow it, so `QCocoaButtonActionMenu` takes the Liquid Glass metrics there.
+
+Under Liquid Glass the window background of the light appearance is white, the same as item views and their headers. `QCocoaAppearance::installWindowContrast()`, called once after the QApplication is created, gives top-level dialogs and main windows a gray background made of the system colors and keeps it in step with the appearance. In the classic design and on Windows it does nothing.
+
 ## Some examples:
 
 ##### QCocoaPreferencesDialog:

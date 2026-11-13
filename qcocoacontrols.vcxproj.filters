@@ -10,6 +10,9 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="qcocoaappearance_generic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="qcocoabutton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -68,6 +71,9 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="qcocoaappearance.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
     <ClInclude Include="qcocoabutton_p.h">
       <Filter>Source Files</Filter>
     </ClInclude>

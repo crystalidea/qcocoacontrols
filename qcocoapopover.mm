@@ -39,7 +39,19 @@ static int EventPopoverClosed = QEvent::User + 1;
 
     _contents->show();
 
-    [self setView:nativeWidgetView];
+    // The Qt view goes into a plain container instead of becoming the controller's view. The controller's view becomes
+    // the content view of the popover window, and Qt then treats that window as its own and pushes the widget's size
+    // constraints onto it. The popover window forwards resizeIncrements to its NSPopoverFrame, which doesn't implement
+    // it, so the app would crash as soon as the minimum or maximum size of the contents changed. Inside the container
+    // the Qt view stays a child view and Qt leaves the popover window alone. The popover gets its size when it is
+    // shown: contents that grow later are clipped
+    NSView *container = [[[NSView alloc] initWithFrame:NSMakeRect(0, 0, NSWidth(nativeWidgetView.frame),
+                                                                  NSHeight(nativeWidgetView.frame))] autorelease];
+    nativeWidgetView.frame = container.bounds;
+    nativeWidgetView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+    [container addSubview:nativeWidgetView];
+
+    [self setView:container];
 }
 
 - (void) receivePopoverClosedNotification:(NSNotification *) notification {
@@ -77,6 +89,10 @@ public:
     void show(NSView * relativeToView, int msec)
     {
         _popup.contentViewController = [[[NSViewControllerQt alloc] initWithContents: _parent->_contents] autorelease];
+
+        // Without an explicit appearance NSPopover gives its frame VibrantLight even when the app is dark: the native
+        // controls inside (QCocoaButton) are then drawn light, with black text on the contents Qt draws dark
+        _popup.appearance = NSApp.effectiveAppearance;
 
         [_popup showRelativeToRect:relativeToView.bounds ofView:relativeToView preferredEdge:NSRectEdgeMinY];
 

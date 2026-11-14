@@ -21,10 +21,10 @@ PRECOMPILED_HEADER = pch.h
 
 HEADERS += qcocoawidget.h qcocoabutton.h qcocoasegmentedbutton.h qcocoaslider.h qcocoagradientbutton.h qcocoabox.h qcocoamessagebox.h qcocoaicon.h \
     qcocoabutton_p.h qcocoabuttonactionmenu.h qcocoapreferencesdialog.h qcocoapopover.h qcocoamenubaritem.h qcoregraphics.h pool.h \
-    qcocoaappearance.h
+    qcocoaappearance.h qcocoacombobox.h
 
 SOURCES += pch.cpp qcocoapreferencesdialog.cpp
 
 OBJECTIVE_SOURCES += qcocoawidget.mm qcocoabutton.mm qcocoabutton_p.mm qcocoasegmentedbutton.mm qcocoaslider.mm qcocoagradientbutton.mm qcocoabox.mm \
     qcocoamessagebox.mm qcocoapreferencesdialog_mac.mm qcocoaicon.mm qcocoabuttonactionmenu.mm qcocoapopover.mm qcocoamenubaritem.mm qcoregraphics.mm pool.mm \
-    qcocoaappearance.mm
+    qcocoaappearance.mm qcocoacombobox.mm

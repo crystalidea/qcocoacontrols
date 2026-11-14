@@ -24,7 +24,9 @@ The reason for that are customizations for the existing **NSImage** class and br
 
 `QCocoaAppearance::design()` tells which design AppKit gives the process: Liquid Glass with macOS 26 and later for an app built against the macOS 26 SDK or later, unless it is built against an SDK older than 27 and sets `UIDesignRequiresCompatibility` in its Info.plist. The controls of the library follow it, so `QCocoaButtonActionMenu` takes the Liquid Glass metrics there.
 
-Under Liquid Glass the window background of the light appearance is white, the same as item views and their headers. `QCocoaAppearance::installWindowContrast()`, called once after the QApplication is created, gives top-level dialogs and main windows a gray background made of the system colors and keeps it in step with the appearance. In the classic design and on Windows it does nothing.
+Under Liquid Glass AppKit draws the title bar of a window in the dark appearance lighter than the window background, while Qt paints the window and its item views in the window background color. `QCocoaAppearance::installWindowContrast()`, called once after the QApplication is created, gives top-level dialogs and main windows in the dark appearance a gray background made of the system colors, as light as the title bar, and keeps it in step with the appearance. In the light appearance the title bar is white like the window, and the windows stay white. In the classic design and on Windows it does nothing.
+
+`QCocoaComboBox` opens its list as a native NSMenu, the way NSPopUpButton does; on other platforms it is a plain QComboBox.
 
 ## Some examples:
 

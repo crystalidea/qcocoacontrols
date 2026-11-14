@@ -19,16 +19,19 @@ public:
     static Design design();
     static bool isLiquidGlass() { return design() == Design::LiquidGlass; }
 
-    // Under Liquid Glass NSColor.windowBackgroundColor is white in the light appearance, and the palette Qt builds
-    // from the system colors paints windows, item views and their headers the same white. installWindowContrast()
-    // gives every top-level QDialog and QMainWindow the Window and Button colors of secondarySystemFillColor laid over
-    // windowBackgroundColor and recomputes them when the appearance changes. In the generic RGB values Qt uses for
-    // its palette that is #EBEBEB light and #292929 dark, against #FFFFFF and #171717 of item views. Only these two
+    // Under Liquid Glass AppKit draws the title bar and the toolbar of a window in the dark appearance lighter than
+    // NSColor.windowBackgroundColor, while the palette Qt builds from the system colors paints windows, item views and
+    // their headers in windowBackgroundColor: the window comes out darker than its own title bar. In the dark
+    // appearance installWindowContrast() gives every top-level QDialog and QMainWindow the Window and Button colors of
+    // secondarySystemFillColor laid over windowBackgroundColor, #292929 in the generic RGB values Qt uses for its
+    // palette, which comes out as light as the title bar, against #171717 of item views. In the light appearance the
+    // title bar is as white as the window background, and the windows keep the colors of the Qt palette: a gray body
+    // under a white title bar looks foreign there. The colors follow the appearance when it changes. Only these two
     // roles of the window itself are set: an application-wide palette would drop the palettes Qt keeps per widget
     // class, such as the alternating rows of item views.
     //
-    // Call it once, after the QApplication is created. It does nothing in the classic design, where the window
-    // background is gray anyway, and on other platforms.
+    // Call it once, after the QApplication is created. It does nothing in the classic design, where the window and
+    // its title bar are of one color anyway, and on other platforms.
     static void installWindowContrast();
 };
 

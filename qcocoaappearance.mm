@@ -72,6 +72,14 @@ namespace
         return color;
     }
 
+    bool isDarkAppearance()
+    {
+        NSAppearanceName name = [NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua,
+                                                                                               NSAppearanceNameDarkAqua]];
+
+        return [name isEqualToString:NSAppearanceNameDarkAqua];
+    }
+
     bool wantsContrast(const QWidget *widget)
     {
         return widget->isWindow() && (qobject_cast<const QDialog *>(widget) || qobject_cast<const QMainWindow *>(widget));
@@ -79,19 +87,24 @@ namespace
 
     void applyContrast(QWidget *window)
     {
-        const QColor color = contrastColor();
+        // in the light appearance the colors of the Qt palette, the white of the title bar; they are set back
+        // explicitly only on a window that was shown in the dark appearance before
+        const QPalette qtPalette = QApplication::palette(window);
+        const bool dark = isDarkAppearance();
+        const QColor windowColor = dark ? contrastColor() : qtPalette.color(QPalette::Window);
+        const QColor buttonColor = dark ? windowColor : qtPalette.color(QPalette::Button);
 
-        if (!color.isValid())
+        if (!windowColor.isValid())
             return;
 
         QPalette palette = window->palette();
 
         // setPalette() sends PaletteChange to every child and repaints the window: only when the color is new
-        if (palette.color(QPalette::Window) == color && palette.color(QPalette::Button) == color)
+        if (palette.color(QPalette::Window) == windowColor && palette.color(QPalette::Button) == buttonColor)
             return;
 
-        palette.setColor(QPalette::Window, color);
-        palette.setColor(QPalette::Button, color);
+        palette.setColor(QPalette::Window, windowColor);
+        palette.setColor(QPalette::Button, buttonColor);
 
         window->setPalette(palette);
     }

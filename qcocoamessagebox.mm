@@ -8,16 +8,16 @@
 
 namespace {
 
-// Снятие мнемоник повторяет QPlatformTheme::removeMnemonics: та объявлена в приватном
-// заголовке QPA, а приватные заголовки Qt библиотека не подключает (ради этого же здесь
-// живёт свой QMacAutoReleasePool). Правила: одиночный '&' выбрасывается, из "&&" остаётся
-// один '&', группа вида "(&X)" удаляется вместе с пробелами перед ней
+// Mnemonic stripping mirrors QPlatformTheme::removeMnemonics: that function is declared in a
+// private QPA header, and this library pulls in no private Qt headers (the same reason it
+// carries its own QMacAutoReleasePool). The rules: a lone '&' is dropped, "&&" collapses
+// to a single '&', and a "(&X)" group is removed along with the whitespace before it
 QString removeMnemonics(const QString &original)
 {
     const auto mnemonicInParentheses = [](QStringView text)
     {
-        // полноширинные скобки считаются равнозначными обычным: так мнемоники пишут
-        // в переводах для китайского, японского и корейского
+        // Fullwidth parentheses count as regular ones: that is how mnemonics are written
+        // in Chinese, Japanese and Korean translations
         constexpr char16_t wideOpen = 0xFF08;
         constexpr char16_t wideClose = 0xFF09;
 
@@ -65,22 +65,24 @@ QString removeMnemonics(const QString &original)
     return returnText;
 }
 
-// Вторая и каждая следующая кнопка с AcceptRole в раскладке macOS стоит левее основной.
-// Своего значения в QMessageBox::ButtonRole для этого нет, поэтому берём первое свободное
+// In the macOS layout the second and every further AcceptRole button sits to the left of
+// the primary one. QMessageBox::ButtonRole has no value for that, so take the first free one
 constexpr int kAlternateRole = QMessageBox::NRoles;
 
 struct RoleSlot
 {
     int role;
 
-    // кнопки одной роли перебираются с конца: их взаимный порядок должен сохраниться
-    // после того, как весь список развернётся при добавлении в алерт
+    // Set for exactly the roles that the MacLayout row of QPlatformDialogHelper::buttonLayout
+    // marks with Reverse: such a role is walked backwards, so that after the whole list is
+    // added to the alert right to left, the first of its buttons ends up rightmost
     bool reverse;
 };
 
-// Порядок кнопок в алерте macOS, слева направо: повторяет строку MacLayout таблицы
-// QPlatformDialogHelper::buttonLayout. Help, Reset, Apply и Action уходят в левую группу,
-// остальные - в правую, где самая правая роль Yes, перед ней No, перед ней Accept
+// Button order in a macOS alert, left to right: the MacLayout row of the
+// QPlatformDialogHelper::buttonLayout table, minus its Stretch separator - placement inside
+// the alert is AppKit's business, only the relative order is ours. Help, Reset, Apply and
+// Action come first; counting from the other end, Yes is rightmost, then No, then Accept
 const RoleSlot kMacRoleOrder[] = {
     { QMessageBox::HelpRole,        false },
     { QMessageBox::ResetRole,       false },
@@ -100,8 +102,8 @@ struct ButtonEntry
     int role;
 };
 
-// Кнопки диалога с ролями. QMessageBox::buttons() отдаёт их сгруппированными по роли,
-// а внутри одной роли - в порядке добавления
+// The dialog buttons with their roles. QMessageBox::buttons() hands them out grouped by
+// role, and within one role in the order they were added
 QList<ButtonEntry> collectButtons(const QMessageBox *pMsgBox)
 {
     QList<ButtonEntry> entries;
@@ -127,7 +129,7 @@ QList<ButtonEntry> collectButtons(const QMessageBox *pMsgBox)
     return entries;
 }
 
-// Тот же список, разложенный по правилам macOS слева направо
+// The same list, laid out left to right by the macOS rules
 QList<ButtonEntry> orderedForMacLayout(const QList<ButtonEntry> &entries)
 {
     QList<ButtonEntry> ordered;
@@ -153,8 +155,8 @@ QList<ButtonEntry> orderedForMacLayout(const QList<ButtonEntry> &entries)
         }
     }
 
-    // роли, которой нет в раскладке, быть не должно: QMessageBox не принимает кнопку
-    // с InvalidRole. Но потерять кнопку хуже, чем поставить её не на место
+    // A role missing from the layout should not happen: QMessageBox rejects a button with
+    // InvalidRole. Still, losing a button is worse than placing it wrong
     if (ordered.size() != entries.size())
     {
         for (const ButtonEntry &entry : entries)
@@ -178,14 +180,15 @@ QList<ButtonEntry> orderedForMacLayout(const QList<ButtonEntry> &entries)
     return ordered;
 }
 
-// Кнопка, которую закрывает Return. Пустой результат значит "решает AppKit", то есть
-// основной станет первая добавленная, она же самая правая
+// The button that Return activates. A null result means "let AppKit decide", which makes the
+// first added button - the rightmost one - the default
 QAbstractButton *resolveDefaultButton(const QMessageBox *pMsgBox, const QList<ButtonEntry> &entries)
 {
     if (QAbstractButton *btn = pMsgBox->defaultButton())
         return btn;
 
-    // первая кнопка с AcceptRole; после переназначения роли такая в списке ровно одна
+    // The first AcceptRole button; after the role reassignment there is at most one of them,
+    // and a box with just Yes and No has none
     for (const ButtonEntry &entry : entries)
     {
         if (entry.role == QMessageBox::AcceptRole)
@@ -195,10 +198,12 @@ QAbstractButton *resolveDefaultButton(const QMessageBox *pMsgBox, const QList<Bu
     return nullptr;
 }
 
-// Кнопка, которую нажимает Escape. Порядок проверок - как в QMessageBoxPrivate::detectEscapeButton
-// (она вызывается только при показе через QDialog, то есть на этом пути не работает), а последним
-// идёт запасное правило нативного алерта Qt: при нескольких кнопках с RejectRole Escape достаётся
-// первой из них. Шаг про кнопку подробностей не нужен - при непустом detailedText() сюда не доходит
+// The button that Escape activates. The checks follow QMessageBoxPrivate::detectEscapeButton,
+// which Qt runs from setVisible() before it decides on a native dialog, so the button it picks
+// reaches the NSAlert as well. Here it never runs: this path puts up the alert without ever
+// making the QMessageBox visible. The last check is the fallback rule of Qt's native alert -
+// with several RejectRole buttons, Escape goes to the first one. The details button step is
+// not needed - a non-empty detailedText() never gets this far
 QAbstractButton *resolveEscapeButton(const QMessageBox *pMsgBox, const QList<ButtonEntry> &entries)
 {
     if (QAbstractButton *btn = pMsgBox->escapeButton())
@@ -230,14 +235,17 @@ QAbstractButton *resolveEscapeButton(const QMessageBox *pMsgBox, const QList<But
     if (pFirstReject && !bSeveralRejects)
         return pFirstReject;
 
-    // Стандартной кнопке No Escape полагается: она и значит отказ. Своей кнопке с этой же
-    // ролью - нет, роль NoRole у таких кнопок обычно стоит просто как "не Accept", и Escape
-    // не должен запускать действие. Qt тут отдаёт Escape любой единственной кнопке с NoRole
+    // The standard No button gets Escape: it really does mean refusal. A custom button with the
+    // same role does not: on custom buttons NoRole usually means nothing more than "not Accept",
+    // and Escape must not fire an action. At this step Qt gives Escape to a NoRole button of any
+    // kind, but only when exactly one such button exists
     if (QAbstractButton *btn = pMsgBox->button(QMessageBox::No))
         return btn;
 
-    // В порядке добавления в алерт первая кнопка роли с флагом reverse идёт там же, где и в
-    // entries, так что это та же кнопка, которую выбрал бы Qt
+    // Qt's native alert gives Escape to the first RejectRole button it adds, and adding reverses
+    // the order of a role a second time, so its pick is the first RejectRole button in entries -
+    // the same one as here, unless the role holds both standard and custom buttons, since Qt's
+    // own list puts all the standard ones first. Null when no RejectRole button exists at all
     return pFirstReject;
 }
 
@@ -248,9 +256,9 @@ int processMessageBoxResult(NSAlert *alert, NSInteger retCode, QMessageBox *pMsg
     if (checkBtn) // mirror unconditionally, the user may have unchecked a pre-checked box
         checkBtn->setChecked([[alert suppressionButton] state] == NSControlStateValueOn);
 
-    // tag кнопки мы задавали сами, поэтому ответ - это её номер в порядке добавления.
-    // Всё, что в этот диапазон не попало (системные NSModalResponse*, лист, закрытый
-    // чужим кодом), кнопкой не является
+    // We set the button tags ourselves, so the response is a button's index in the order they
+    // were added. Anything outside that range (the system NSModalResponse* values, a sheet
+    // closed by someone else's code) is not a button
     const int nButtonIndex = static_cast<int>(retCode - NSAlertFirstButtonReturn);
 
     if (nButtonIndex < 0 || nButtonIndex >= addedButtons.size())
@@ -258,9 +266,9 @@ int processMessageBoxResult(NSAlert *alert, NSInteger retCode, QMessageBox *pMsg
 
     QAbstractButton *btn = addedButtons.at(nButtonIndex);
 
-    // Нажать кнопку обязательно: на этом держатся и clickedButton(), и сигнал clicked,
-    // которым пользуются вызывающие. По этому же сигналу QMessageBox закрывает диалог сам.
-    // Для стандартной кнопки дополнительно возвращаем её код
+    // The click is not optional: it is what sets clickedButton() and emits the clicked signal
+    // that callers rely on, and QMessageBox closes the dialog itself on that same signal.
+    // For a standard button we return its code as well
     btn->click();
 
     return pMsgBox->standardButton(btn);
@@ -275,8 +283,8 @@ int QCocoaMessageBox::exec()
     // Make us the active application
     [NSApp activateIgnoringOtherApps:YES];
 
-    // NSAlert не умеет ни отдельного блока подробностей, ни разметки в тексте: такое
-    // сообщение отдаём обычному диалогу Qt, он рисует и то, и другое
+    // NSAlert has neither a separate details section nor rich text: hand such a message over
+    // to the ordinary Qt dialog, which draws both
     bool bFallbackToWidgetDialog = Qt::mightBeRichText(text()) || Qt::mightBeRichText(informativeText());
 
 #if QT_CONFIG(textedit)
@@ -297,8 +305,8 @@ int QCocoaMessageBox::exec()
     if (infoText.size())
         [alert setInformativeText: infoText.toNSString()];
 
-    // Картинку меняет только стиль critical: AppKit вешает на иконку программы
-    // предупреждающий значок. Warning и informational выглядят одинаково
+    // Only the critical style changes the picture: AppKit badges the application icon with a
+    // caution sign. Warning and informational look the same
     if (icon() == QMessageBox::Critical)
         alert.alertStyle = NSAlertStyleCritical;
     else if (icon() == QMessageBox::Warning)
@@ -306,9 +314,9 @@ int QCocoaMessageBox::exec()
     else
         alert.alertStyle = NSAlertStyleInformational;
 
-    // Своя картинка - только если её задали явно: setIcon() тоже заполняет iconPixmap(),
-    // но картинкой из стиля Qt, а она в нативном алерте выглядит чужой. Явный
-    // setIconPixmap() сбрасывает icon() в NoIcon, по этому их и отличаем
+    // A picture of our own only when it was set explicitly: setIcon() fills iconPixmap() too,
+    // but with an image from the Qt style, which looks foreign in a native alert. An explicit
+    // setIconPixmap() resets icon() to NoIcon, which is how the two are told apart
     if (icon() == QMessageBox::NoIcon && !iconPixmap().isNull())
         alert.icon = QCocoaIcon::imageFromQIcon(iconPixmap());
 
@@ -340,62 +348,63 @@ int QCocoaMessageBox::exec()
     QList<QAbstractButton *> addedButtons;
     addedButtons.reserve(entries.size());
 
-    // addButtonWithTitle: кладёт кнопки справа налево, поэтому разложенный слева направо
-    // список добавляем с конца
+    // addButtonWithTitle: places buttons right to left, so the list laid out left to right is
+    // added starting from its end
     const QList<ButtonEntry> ordered = orderedForMacLayout(entries);
 
     for (auto it = ordered.crbegin(); it != ordered.crend(); ++it)
     {
         QAbstractButton *btn = it->button;
 
-        // Мнемоники снимаем только у стандартных кнопок: их подписи приходят из темы Qt
-        // вместе с амперсандами ("&Yes"). В своих подписях - а они приходят из локализации
-        // и от сервера лицензий - амперсанд может быть настоящим символом текста
+        // Mnemonics are stripped from standard buttons only: their titles come from the Qt theme
+        // with the ampersands in them ("&Yes"). In titles of our own - and those come from the
+        // localization and from the license server - an ampersand can be a literal character
         const bool bStandardButton = standardButton(btn) != QMessageBox::NoButton;
         const QString title = bStandardButton ? removeMnemonics(btn->text()) : btn->text();
 
         NSButton *addedButton = [alert addButtonWithTitle: title.toNSString()];
 
-        // Ответ алерта задаём сами: пусть это будет номер кнопки в порядке добавления.
-        // Разбирать ответ как номер в buttons() нельзя - тот список в этом порядке не лежит
+        // We define the alert's response ourselves: let it be the button's index in the order they
+        // were added. Reading the response as an index into buttons() would be wrong - that list
+        // is not kept in this order
         addedButton.tag = NSAlertFirstButtonReturn + addedButtons.size();
         addedButtons.append(btn);
 
         if (it->role == QMessageBox::DestructiveRole)
             addedButton.hasDestructiveAction = YES;
 
-        // AppKit сам отдаёт Return первой добавленной кнопке, а Escape - кнопке с подписью
-        // "Cancel", поэтому назначения надо не только ставить, но и снимать
+        // By default AppKit gives Return to the first added button and Escape to any button
+        // titled "Cancel", so the key equivalents have to be cleared as well as set
         if (btn == pDefaultButton)
             addedButton.keyEquivalent = @"\r";
         else if ([addedButton.keyEquivalent isEqualToString:@"\r"])
             addedButton.keyEquivalent = @"";
 
-        // Escape не перебивает Return: так же ведёт себя и AppKit. Escape записан восьмеричным
-        // кодом, потому что \e - это расширение GNU, а не стандартная последовательность
+        // Escape does not override Return, which is how AppKit behaves too. Escape is spelled as an
+        // octal code because \e is a GNU extension, not a standard escape sequence
         if (btn == pEscapeButton && ![addedButton.keyEquivalent isEqualToString:@"\r"])
             addedButton.keyEquivalent = @"\033";
         else if ([addedButton.keyEquivalent isEqualToString:@"\033"])
             addedButton.keyEquivalent = @"";
     }
 
-    // Основную кнопку не задали и роли её не выбрали - возвращаем правило AppKit:
-    // основной становится первая добавленная, то есть самая правая
+    // No default button was set and no role picked one: restore the AppKit rule, where the
+    // first added - that is, the rightmost - button becomes the default
     if (!pDefaultButton)
         alert.buttons.firstObject.keyEquivalent = @"\r";
 
-    // Внутри модального цикла AppKit продолжает работать и обработчик событий Qt, а значит
-    // доставляются отложенные удаления: диалог могли снести вместе с его родителем, пока
-    // сообщение стояло на экране. Тогда разбирать ответ уже не на чем
+    // Qt's event dispatcher keeps running inside the AppKit modal loop, which means deferred
+    // deletions get delivered: the dialog may have been destroyed along with its parent while
+    // the message stood on screen. There is then nothing left to read the response from
     QPointer<QMessageBox> guard(this);
 
     NSInteger retCode = NSModalResponseCancel;
 
     QWidget *pParent = qobject_cast<QWidget *>(parent());
 
-    // Лист показываем только у видимого и развёрнутого окна: winId() создаёт окно
-    // принудительно, а лист крепится под заголовком родителя - у невидимого или свёрнутого
-    // окна он остался бы невидимым, а программа встала бы в модальном цикле
+    // A sheet is shown only for a window that is visible and not minimized: winId() forces the
+    // window into existence, and a sheet slides out from under the parent's title bar - for a
+    // hidden or minimized parent it would stay invisible, with the program stuck in a modal loop
     if (pParent && pParent->window()->isVisible() && !pParent->window()->isMinimized())
     {
         NSView *view = reinterpret_cast<NSView *>(pParent->window()->winId());
@@ -410,8 +419,8 @@ int QCocoaMessageBox::exec()
     }
     else
     {
-        // runModal не должен возвращать NSModalResponseContinue, но по QTBUG-114546
-        // бывает, что возвращает: это значит "модальный цикл продолжается"
+        // runModal is not supposed to return NSModalResponseContinue, but per QTBUG-114546 it
+        // sometimes does: it means "the modal session is still running"
         do
         {
             retCode = [alert runModal];

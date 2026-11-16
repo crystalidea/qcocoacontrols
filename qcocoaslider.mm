@@ -1,6 +1,7 @@
 #include "pch.h" // QMacAutoReleasePool
 #include "qcocoaslider.h"
 
+#import <AppKit/NSLayoutConstraint.h> // intrinsicContentSize
 #import <AppKit/NSSlider.h>
 #import <AppKit/NSSliderCell.h>
 
@@ -100,8 +101,14 @@ void QCocoaSlider::setSliderType(SliderType type /*= LinearHorizontal*/)
 
 QSize QCocoaSlider::sizeHint() const
 {
-    NSRect frame = [pimpl->nsSlider frame];
-    return QSize(frame.size.width, frame.size.height);
+    // The frame of the slider is what the layout made of it, empty before the first layout. NSSlider tells its
+    // thickness through its intrinsic size and takes any length along its track; such a slider gets the length that
+    // +[NSSlider sliderWithValue:minValue:maxValue:target:action:] gives it. A circular one has a size of its own
+    const int length = 100;
+    const NSSize intrinsic = pimpl->nsSlider.intrinsicContentSize;
+
+    return QSize(intrinsic.width > 0 ? qCeil(intrinsic.width) : length,
+                 intrinsic.height > 0 ? qCeil(intrinsic.height) : length);
 }
 
 void QCocoaSlider::setOrientation(Qt::Orientation orientation)

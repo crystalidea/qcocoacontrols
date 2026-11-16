@@ -207,6 +207,7 @@
   <ItemGroup>
     <ClInclude Include="qcocoaappearance.h" />
     <ClInclude Include="qcocoacombobox.h" />
+    <ClInclude Include="qcocoatabwidget.h" />
     <ClInclude Include="qcocoacontrols.h" />
     <ClInclude Include="qcocoaicon.h" />
     <ClInclude Include="pch.h" />

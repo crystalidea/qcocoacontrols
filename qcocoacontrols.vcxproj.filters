@@ -77,6 +77,9 @@
     <ClInclude Include="qcocoacombobox.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="qcocoatabwidget.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
     <ClInclude Include="qcocoabutton_p.h">
       <Filter>Source Files</Filter>
     </ClInclude>

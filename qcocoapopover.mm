@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "qcocoapopover.h"
+#include "qcocoaappearance.h"
 #include "qcocoamenubaritem.h"
 
 #import <AppKit/AppKit.h>
@@ -7,7 +8,8 @@
 static int EventPopoverClosed = QEvent::User + 1;
 
 @interface NSViewControllerQt : NSViewController {
-    QWidget * _contents;
+    // AppKit tells the controller that the popover closed once its animation ends, by when the contents may be gone
+    QPointer<QWidget> _contents;
 }
 -(id)initWithContents:(QWidget *)w;
 @end
@@ -60,8 +62,11 @@ static int EventPopoverClosed = QEvent::User + 1;
 
     [[NSNotificationCenter defaultCenter] removeObserver: self];
 
-    QEvent ev( (QEvent::Type)EventPopoverClosed);
-    QCoreApplication::sendEvent(_contents, &ev);
+    if (_contents)
+    {
+        QEvent ev( (QEvent::Type)EventPopoverClosed);
+        QCoreApplication::sendEvent(_contents, &ev);
+    }
 }
 @end
 
@@ -83,6 +88,7 @@ public:
 
     ~QCocoaPopoverPrivate()
     {
+        removeEscapeMonitor();
         [_popup release];
     }
 
@@ -104,6 +110,24 @@ public:
                                                          name:@"NSPopoverDidCloseNotification"
                                                        object:_popup];
 
+        // Escape goes to the key window, which stays the window of Qt while the popover is open, so AppKit doesn't
+        // close a transient or semitransient popover on it: the key is taken here before it reaches that window
+        if (!_escapeMonitor)
+        {
+            NSPopover *popup = _popup;
+
+            _escapeMonitor = [[NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown
+                                                                    handler:^NSEvent *(NSEvent *event) {
+                if (event.keyCode == 53 && popup.shown && popup.behavior != NSPopoverBehaviorApplicationDefined)
+                {
+                    [popup performClose:nil];
+                    return nil;
+                }
+
+                return event;
+            }] retain];
+        }
+
         if (msec)
         {
             _timer = new QTimer(this);
@@ -120,6 +144,26 @@ public:
     void closeNSPopover()
     {
         [_popup close];
+    }
+
+    // The popover is gone before this returns, and AppKit tells about it right away rather than after an animation
+    void closeWithoutAnimation()
+    {
+        if (_popup.shown)
+        {
+            _popup.animates = NO;
+            [_popup close];
+        }
+    }
+
+    void removeEscapeMonitor()
+    {
+        if (_escapeMonitor)
+        {
+            [NSEvent removeMonitor:_escapeMonitor];
+            [_escapeMonitor release];
+            _escapeMonitor = nil;
+        }
     }
 
     void close()
@@ -151,6 +195,7 @@ private:
     NSPopover *_popup = nullptr;
     QCocoaPopover *_parent = nullptr;
     QTimer *_timer = nullptr;
+    id _escapeMonitor = nil;
 };
 
 static const char *PROP_IS_POPOVER = "QCocoaPopover";
@@ -160,6 +205,11 @@ QCocoaPopover::QCocoaPopover(QObject *parent, QWidget *contents)
 {
     _contents->setProperty(PROP_IS_POPOVER, true);
 
+    // Under Liquid Glass a popover is a piece of glass: the contents leave out the background of a window, as the
+    // controls of a native popover do, and the glass shows through around them
+    if (QCocoaAppearance::isLiquidGlass())
+        _contents->setAttribute(Qt::WA_TranslucentBackground);
+
     // this is required to handle custom event (EventPopoverClosed)
     _contents->installEventFilter(this);
 }
@@ -168,7 +218,8 @@ QCocoaPopover::~QCocoaPopover()
 {
     _contents->removeEventFilter(this);
 
-    p->close();
+    // Without its animation the popover is gone, and AppKit has told so, while the contents still exist
+    p->closeWithoutAnimation();
 
     _contents->deleteLater();
 }
@@ -179,6 +230,8 @@ bool QCocoaPopover::eventFilter(QObject *obj, QEvent *event)
     {
         // no need to close the popup and the widget because they are already closed by cocoa
         // only need to emit the signal
+
+        p->removeEscapeMonitor();
 
         emit closed();
 

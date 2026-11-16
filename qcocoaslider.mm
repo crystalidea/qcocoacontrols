@@ -103,12 +103,18 @@ QSize QCocoaSlider::sizeHint() const
 {
     // The frame of the slider is what the layout made of it, empty before the first layout. NSSlider tells its
     // thickness through its intrinsic size and takes any length along its track; such a slider gets the length that
-    // +[NSSlider sliderWithValue:minValue:maxValue:target:action:] gives it. A circular one has a size of its own
-    const int length = 100;
+    // +[NSSlider sliderWithValue:minValue:maxValue:target:action:] gives it. A circular one has a size of its own.
+    //
+    // The intrinsic size is the size of the alignment rect. The frame adds the alignment insets, the room the knob is
+    // drawn in: on macOS 12 a regular slider is 20 pt there and 28 pt in its frame (2 pt above, 6 pt below), and the
+    // view clips the knob to its frame. Under Liquid Glass the insets are zero
+    const CGFloat length = 100;
     const NSSize intrinsic = pimpl->nsSlider.intrinsicContentSize;
+    const NSRect alignment = NSMakeRect(0, 0, intrinsic.width > 0 ? intrinsic.width : length,
+                                        intrinsic.height > 0 ? intrinsic.height : length);
+    const NSRect frame = [pimpl->nsSlider frameForAlignmentRect:alignment];
 
-    return QSize(intrinsic.width > 0 ? qCeil(intrinsic.width) : length,
-                 intrinsic.height > 0 ? qCeil(intrinsic.height) : length);
+    return QSize(qCeil(NSWidth(frame)), qCeil(NSHeight(frame)));
 }
 
 void QCocoaSlider::setOrientation(Qt::Orientation orientation)

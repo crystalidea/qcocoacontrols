@@ -30,7 +30,7 @@ Under Liquid Glass AppKit draws the title bar of a window in the dark appearance
 
 Under Liquid Glass `QCocoaPopover` leaves out the window background of its contents, so the glass of the popover shows through them as in a native popover. A transient or semitransient popover closes on Escape, though the key goes to the window of Qt.
 
-`QCocoaTabWidget` is a QTabWidget whose tabs are the bar of NSTabView under Liquid Glass with macOS 27 and later: an NSSegmentedControl with the tabs role, whose selection is a piece of glass that slides to the chosen tab. The pane and the places of the bar and the pages come from an NSTabView of the same size, so it looks like NSTabView in both appearances and in the small size. QTabBar still keeps the tabs, so the QTabWidget API works as usual; the tabs are always on top, without close buttons, moving, the document mode or corner widgets. On macOS 26 and earlier, in the classic design and on other platforms it is a plain QTabWidget.
+`QCocoaTabWidget` is a QTabWidget whose tabs are the bar of NSTabView under Liquid Glass: an NSSegmentedControl, with the tabs role on macOS 27 and later, where its selection is a piece of glass that slides to the chosen tab, and without it on macOS 26, where the selected tab is filled with the accent color. The pane and the places of the bar and the pages come from an NSTabView of the same size, so it looks like NSTabView in both appearances and in the small size. QTabBar still keeps the tabs, so the QTabWidget API works as usual; the tabs are always on top, without close buttons, moving, the document mode or corner widgets. On macOS 15 and earlier, in the classic design, built with an SDK older than 27 and on other platforms it is a plain QTabWidget.
 
 ## Some examples:
 

@@ -6,8 +6,8 @@
 
 #include <functional>
 
-// NSSegmentedControl takes the tabs role from the macOS 27 SDK on. Built with an older SDK the class stays a plain
-// QTabWidget, as an app built with it wouldn't get the bar of NSTabView either
+// The bar follows NSTabView, whose bar has the tabs role from macOS 27 on, which the macOS 27 SDK declares. Built with
+// an older SDK the class stays a plain QTabWidget: on macOS 27 the bar would have no role, unlike the bar of NSTabView
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
 #define QCOCOATABWIDGET_NATIVE_BAR
 #endif
@@ -231,11 +231,14 @@ public:
         return titles;
     }
 
-    // The bar lies at a fraction of a point, one more point holds it
+    // The width the bar takes in the tab widget, and one more point, as the bar lies at a fraction of a point. The
+    // tab view lays it out in a width that holds any bar, so that it doesn't squeeze its tabs
     QSize sizeHint() const override
     {
         const NSSize size = controlSize();
-        return QSize(qCeil(size.width) + 1, qCeil(size.height) + 1);
+        const qreal width = _d && _d->bar == this ? _d->layout(QSize(4000, 300)).bar.width() : size.width;
+
+        return QSize(qCeil(width) + 1, qCeil(size.height) + 1);
     }
 
     QSize minimumSizeHint() const override
@@ -519,13 +522,16 @@ QCocoaTabWidgetPrivate::Layout QCocoaTabWidgetPrivate::layout(const QSize &size)
             layout.offscreenBar = QRectF::fromCGRect(view.frame);
     }
 
-    // the native bar takes the width its tabs need, which icons make larger, and is centered like the bar of
-    // NSTabView. Titles give it widths in fractions of a point, and it starts at a whole pixel of the screen
+    // The native bar is as wide as the bar of NSTabView, which on macOS 26 gives each tab more room than the
+    // segmented control needs: the control shares the extra width out among its tabs. Icons, which the offscreen tab
+    // view doesn't show, can make the native bar wider still. It is centered like the bar of NSTabView; titles give
+    // it widths in fractions of a point, and it starts at a whole pixel of the screen
     const NSSize barSize = bar ? bar->controlSize() : NSZeroSize;
+    const qreal barWidth = qMax<qreal>(barSize.width, layout.offscreenBar.width());
     const qreal scale = tabWidget->devicePixelRatioF();
     const auto pixel = [scale](qreal value) { return qRound(value * scale) / scale; };
 
-    layout.bar = QRectF(pixel((size.width() - barSize.width) / 2), pixel(layout.offscreenBar.top()), barSize.width,
+    layout.bar = QRectF(pixel((size.width() - barWidth) / 2), pixel(layout.offscreenBar.top()), barWidth,
                         barSize.height);
 
     const QRect contents = QRectF::fromCGRect(_metrics.contentRect).toRect();
@@ -626,7 +632,7 @@ QCocoaTabWidget::QCocoaTabWidget(QWidget *parent)
     : QTabWidget(parent)
 {
 #ifdef QCOCOATABWIDGET_NATIVE_BAR
-    if (@available(macOS 27, *))
+    if (@available(macOS 26, *))
     {
         if (QCocoaAppearance::isLiquidGlass())
         {

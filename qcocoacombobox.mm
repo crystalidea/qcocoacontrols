@@ -41,8 +41,17 @@ public:
 
     void reset()
     {
-        [menu release];
-        menu = nil;
+        if (menu)
+        {
+            // The combo box may be deleted while its menu is open: the menu closes, and its items let go of the
+            // target released below, however long AppKit keeps the menu around
+            for (NSMenuItem *item in menu.itemArray)
+                item.target = nil;
+
+            [menu cancelTracking];
+            [menu release];
+            menu = nil;
+        }
 
         if (target)
         {
@@ -128,7 +137,10 @@ void QCocoaComboBox::showPopup()
                                                 keyEquivalent:@""] autorelease];
         item.target = _popup->target;
         item.tag = i;
-        item.enabled = (model()->flags(index) & Qt::ItemIsEnabled) ? YES : NO;
+        // as in the list Qt draws, an item has to be selectable as well to be chosen: an enabled heading of a group
+        // is not
+        const Qt::ItemFlags flags = model()->flags(index);
+        item.enabled = (flags & Qt::ItemIsEnabled) && (flags & Qt::ItemIsSelectable) ? YES : NO;
         item.state = i == current ? NSControlStateValueOn : NSControlStateValueOff;
 
         const QIcon icon = itemIcon(i);

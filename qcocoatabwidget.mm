@@ -36,8 +36,13 @@
 @implementation QCocoaTabBarTarget
 - (void)segmentSelected:(NSSegmentedControl *)sender
 {
-    if (selected)
-        selected(sender.selectedSegment);
+    // A receiver of the signals may delete the tab widget, whose bar then resets and releases this target, the
+    // function included. The call runs on a copy that lives until it returns, and nothing here touches the target
+    // after the call
+    const std::function<void(NSInteger)> call = selected;
+
+    if (call)
+        call(sender.selectedSegment);
 }
 @end
 
@@ -286,6 +291,13 @@ public:
 
         const QSize iconSize = this->iconSize().isValid() ? this->iconSize() : QSize(16, 16);
 
+        // the images on the segments are made in one size: a new icon size makes them again
+        if (_iconSize != iconSize)
+        {
+            _icons.fill(0);
+            _iconSize = iconSize;
+        }
+
         for (qsizetype segment = 0; segment < tabs.size(); ++segment)
         {
             const int tab = tabs.at(segment);
@@ -384,8 +396,13 @@ private:
 
         const int tab = _tabs.at(segment);
 
+        // a receiver of tabBarClicked may delete the tab widget, and the bar with it
+        QPointer<QCocoaTabBar> guard(this);
+
         emit tabBarClicked(tab);
-        setCurrentIndex(tab);
+
+        if (guard)
+            setCurrentIndex(tab);
     }
 
     void selectCurrent()
@@ -417,6 +434,7 @@ private:
 
     QList<int> _tabs; // the tab of each segment: a hidden tab has none
     QList<qint64> _icons; // the cache keys of the icons on the segments
+    QSize _iconSize; // the size their images are made in
     int _size = -1; // the NSControlSize the bar has
     bool _syncQueued = false;
 };

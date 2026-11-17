@@ -85,28 +85,65 @@ namespace
         return widget->isWindow() && (qobject_cast<const QDialog *>(widget) || qobject_cast<const QMainWindow *>(widget));
     }
 
+    // The palette a window had before its first contrast, kept on the window. Its resolve mask tells which roles the
+    // app set on the window and which ones the window inherits
+    const char *const PaletteBeforeContrast = "qcocoaPaletteBeforeContrast";
+
+    // In the dark appearance the window and its buttons get the gray of the contrast. In the light appearance the
+    // title bar is as white as the window background, so a window that got the contrast gets back the Window and
+    // Button roles it had before, set or inherited as they were, and keeps whatever else the app has set on it since.
+    // A window that never got the contrast is left alone, with its own colors
     void applyContrast(QWidget *window)
     {
-        // in the light appearance the colors of the Qt palette, the white of the title bar; they are set back
-        // explicitly only on a window that was shown in the dark appearance before
-        const QPalette qtPalette = QApplication::palette(window);
-        const bool dark = isDarkAppearance();
-        const QColor windowColor = dark ? contrastColor() : qtPalette.color(QPalette::Window);
-        const QColor buttonColor = dark ? windowColor : qtPalette.color(QPalette::Button);
-
-        if (!windowColor.isValid())
-            return;
-
         QPalette palette = window->palette();
 
-        // setPalette() sends PaletteChange to every child and repaints the window: only when the color is new
-        if (palette.color(QPalette::Window) == windowColor && palette.color(QPalette::Button) == buttonColor)
+        if (isDarkAppearance())
+        {
+            const QColor color = contrastColor();
+
+            if (!color.isValid())
+                return;
+
+            if (!window->property(PaletteBeforeContrast).isValid())
+                window->setProperty(PaletteBeforeContrast, QVariant::fromValue(palette));
+
+            // setPalette() sends PaletteChange to every child and repaints the window: only when the color is new
+            if (palette.color(QPalette::Window) == color && palette.color(QPalette::Button) == color)
+                return;
+
+            palette.setColor(QPalette::Window, color);
+            palette.setColor(QPalette::Button, color);
+
+            window->setPalette(palette);
+            return;
+        }
+
+        const QVariant before = window->property(PaletteBeforeContrast);
+
+        if (!before.isValid())
             return;
 
-        palette.setColor(QPalette::Window, windowColor);
-        palette.setColor(QPalette::Button, buttonColor);
+        window->setProperty(PaletteBeforeContrast, QVariant());
 
-        window->setPalette(palette);
+        QPalette restored = before.value<QPalette>();
+
+        for (int group = 0; group < QPalette::NColorGroups; ++group)
+        {
+            for (int role = 0; role < QPalette::NColorRoles; ++role)
+            {
+                const QPalette::ColorGroup colorGroup = QPalette::ColorGroup(group);
+                const QPalette::ColorRole colorRole = QPalette::ColorRole(role);
+
+                // NoRole shares its bits in the resolve mask with Accent
+                if (colorRole == QPalette::Window || colorRole == QPalette::Button || colorRole == QPalette::NoRole)
+                    continue;
+
+                if (palette.isBrushSet(colorGroup, colorRole))
+                    restored.setBrush(colorGroup, colorRole, palette.brush(colorGroup, colorRole));
+            }
+        }
+
+        window->setPalette(restored);
     }
 
     // Show comes before the window is put on screen, every time it is shown, so a window that was hidden while the

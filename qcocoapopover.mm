@@ -70,6 +70,30 @@ static int EventPopoverClosed = QEvent::User + 1;
 }
 @end
 
+// The appearance of a popover is set explicitly, so it doesn't follow the app by itself: while the popover is shown,
+// a change of the appearance of the app goes to the popover, and its frame and native controls match the contents Qt
+// repaints
+@interface QCocoaPopoverAppearanceObserver : NSObject
+{
+@public
+    NSPopover *popover; // not retained: QCocoaPopoverPrivate owns the popover and stops this observer first
+}
+@end
+
+@implementation QCocoaPopoverAppearanceObserver
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey, id> *)change context:(void *)context
+{
+    Q_UNUSED(keyPath);
+    Q_UNUSED(object);
+    Q_UNUSED(change);
+    Q_UNUSED(context);
+
+    if (popover.shown)
+        popover.appearance = NSApp.effectiveAppearance;
+}
+@end
+
 class QCocoaPopoverPrivate : public QObject
 {
 
@@ -89,6 +113,7 @@ public:
     ~QCocoaPopoverPrivate()
     {
         removeEscapeMonitor();
+        stopFollowingAppearance();
         [_popup release];
     }
 
@@ -99,6 +124,14 @@ public:
         // Without an explicit appearance NSPopover gives its frame VibrantLight even when the app is dark: the native
         // controls inside (QCocoaButton) are then drawn light, with black text on the contents Qt draws dark
         _popup.appearance = NSApp.effectiveAppearance;
+
+        if (!_appearanceObserver)
+        {
+            _appearanceObserver = [[QCocoaPopoverAppearanceObserver alloc] init];
+            _appearanceObserver->popover = _popup;
+
+            [NSApp addObserver:_appearanceObserver forKeyPath:@"effectiveAppearance" options:0 context:nullptr];
+        }
 
         [_popup showRelativeToRect:relativeToView.bounds ofView:relativeToView preferredEdge:NSRectEdgeMinY];
 
@@ -166,6 +199,16 @@ public:
         }
     }
 
+    void stopFollowingAppearance()
+    {
+        if (_appearanceObserver)
+        {
+            [NSApp removeObserver:_appearanceObserver forKeyPath:@"effectiveAppearance"];
+            [_appearanceObserver release];
+            _appearanceObserver = nil;
+        }
+    }
+
     void close()
     {
         if (_popup.shown)
@@ -196,6 +239,7 @@ private:
     QCocoaPopover *_parent = nullptr;
     QTimer *_timer = nullptr;
     id _escapeMonitor = nil;
+    QCocoaPopoverAppearanceObserver *_appearanceObserver = nil;
 };
 
 static const char *PROP_IS_POPOVER = "QCocoaPopover";
@@ -232,6 +276,7 @@ bool QCocoaPopover::eventFilter(QObject *obj, QEvent *event)
         // only need to emit the signal
 
         p->removeEscapeMonitor();
+        p->stopFollowingAppearance();
 
         emit closed();
 

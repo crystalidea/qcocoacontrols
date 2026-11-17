@@ -18,6 +18,11 @@ public:
 
     QString text() const { return _text;}
 
+    // Width the button needs to show text in full, for giving it one width for all the titles it switches between.
+    // The arrow and the margins take about 48 pt under Liquid Glass and less in the classic design, so a width made of
+    // the text width and a fixed allowance cuts the title in one of them
+    int widthForText(const QString &text) const;
+
 private:
 
     QString _text;

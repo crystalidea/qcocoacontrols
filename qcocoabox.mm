@@ -61,7 +61,11 @@ void QCocoaBox::setContentWidget(QWidget *widget)
 
             setMinimumSize(minSize);
 
-            widget->setPalette(Qt::transparent); // make sure it's transparent
+            // The box shows through the contents: only their background goes transparent. A palette made of one
+            // color, as QPalette(Qt::transparent) is, also derives the text colors from it, white for a dark color
+            QPalette palette = widget->palette();
+            palette.setColor(QPalette::Window, Qt::transparent);
+            widget->setPalette(palette);
 
             if (widget->layout())
                 widget->layout()->setContentsMargins(QMargins(0,0,0,0)); // make sure to have no margins

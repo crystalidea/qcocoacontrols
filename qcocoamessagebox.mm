@@ -266,12 +266,15 @@ int processMessageBoxResult(NSAlert *alert, NSInteger retCode, QMessageBox *pMsg
 
     QAbstractButton *btn = addedButtons.at(nButtonIndex);
 
+    // The code of a standard button is read before the click: a receiver of clicked may delete
+    // the box, and with it the button, so neither is touched after the click
+    const int nStandardButton = pMsgBox->standardButton(btn);
+
     // The click is not optional: it is what sets clickedButton() and emits the clicked signal
-    // that callers rely on, and QMessageBox closes the dialog itself on that same signal.
-    // For a standard button we return its code as well
+    // that callers rely on, and QMessageBox closes the dialog itself on that same signal
     btn->click();
 
-    return pMsgBox->standardButton(btn);
+    return nStandardButton;
 }
 
 } // namespace

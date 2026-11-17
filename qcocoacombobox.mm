@@ -17,8 +17,13 @@
 @implementation QCocoaComboBoxMenuTarget
 - (void)itemChosen:(NSMenuItem *)item
 {
-    if (chosen)
-        chosen(int(item.tag));
+    // A receiver of the signals may delete the combo box, whose destructor resets and releases this target, the
+    // function included. The call runs on a copy that lives until it returns, and nothing here touches the target
+    // after the call
+    const std::function<void(int)> call = chosen;
+
+    if (call)
+        call(int(item.tag));
 }
 @end
 
@@ -78,7 +83,9 @@ void QCocoaComboBox::showPopup()
 
     QPointer<QCocoaComboBox> guard(this);
 
-    // the same signals as when an item is chosen in the list Qt draws
+    // The same signals as when an item is chosen in the list Qt draws, with the text taken before activated as Qt
+    // does. A receiver of activated may delete the combo box, so the guard is checked after every signal. A receiver
+    // of currentIndexChanged may not: QComboBox itself goes on with the deleted object after that signal
     _popup->target->chosen = [guard](int index) {
 
         if (!guard)
@@ -86,8 +93,17 @@ void QCocoaComboBox::showPopup()
 
         guard->setCurrentIndex(index);
 
+        if (!guard)
+            return;
+
+        const QString text = guard->itemText(index);
+
         emit guard->activated(index);
-        emit guard->textActivated(guard->itemText(index));
+
+        if (!guard)
+            return;
+
+        emit guard->textActivated(text);
     };
 
     NSMenu *menu = [[NSMenu alloc] initWithTitle:@""];

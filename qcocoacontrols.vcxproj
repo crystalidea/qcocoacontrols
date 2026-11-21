@@ -225,9 +225,6 @@
     <QtMoc Include="qcocoabuttonactionmenu.h" />
     <ClInclude Include="qcocoabutton_p.h" />
   </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="qcocoacontrols.qrc" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />

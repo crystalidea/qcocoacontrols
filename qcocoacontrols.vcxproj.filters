@@ -93,9 +93,4 @@
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="qcocoacontrols.qrc">
-      <Filter>Source Files</Filter>
-    </QtRcc>
-  </ItemGroup>
 </Project>

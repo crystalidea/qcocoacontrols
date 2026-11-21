@@ -2,7 +2,7 @@
 
 The library helps to make use of native macOS controls in a Qt app. On Windows (and others?) it's supposed to provide a decent fallback.
 
-Requires Qt 6 (we build it with Qt 6.8) and macOS 12 or later.
+Requires Qt 6 (we build it with Qt 6.8), a C++20 compiler and macOS 12 or later.
 
 Many of those controls are used in our [Macs Fan Control](https://crystalidea.com/macs-fan-control) and [AnyToISO](https://crystalidea.com/anytoiso) apps.
 

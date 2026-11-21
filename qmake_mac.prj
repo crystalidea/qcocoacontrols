@@ -6,15 +6,13 @@
 # source tree. The helper functions and cross-project library paths of
 # that file are deliberately left out -- they only make sense there.
 #
-# Build directory naming, the deployment target and the compiler switches
-# ARE kept identical to it, so both files resolve to the same paths and a
-# build configured half by one and half by the other still finds the
-# library. Two differences are deliberate. The language level is C++17
-# here (nothing in this library needs more) where the internal file uses
-# C++20, so do not reuse one build directory across the two without
-# cleaning it first. And the architecture is detected from Qt here, while
-# the internal file always builds the slices of its prebuilt third-party
-# tree (arm64 debug, universal release).
+# Build directory naming, the deployment target, the language level and
+# the compiler switches ARE kept identical to it, so both files resolve
+# to the same paths and a build configured half by one and half by the
+# other still finds the library. One difference is deliberate: the
+# architecture is detected from Qt here, while the internal file always
+# builds the slices of its prebuilt third-party tree (arm64 debug,
+# universal release).
 ########################################################################
 
 CONFIG += precompile_header
@@ -102,7 +100,7 @@ else {
 }
 
 QMAKE_MACOSX_DEPLOYMENT_TARGET = 12 # required by Qt 6.8
-CONFIG += c++17
+CONFIG += c++20
 
 # Apple clang 21 (Xcode 26.4 and later) reports __yield as a builtin on arm64
 # but leaves it undeclared without <arm_acle.h>, so qyieldcpu.h of Qt 6.8 does

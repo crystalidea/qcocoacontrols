@@ -5,10 +5,14 @@
 // design takes away from Qt widgets.
 //
 // AppKit decides on Liquid Glass per process: it is on with macOS 26 and later if the executable was built against
-// the macOS 26 SDK or later, unless it was built against an SDK older than 27 and sets UIDesignRequiresCompatibility
-// in its Info.plist. design() reads the SDK recorded in the executable, not the one this library was compiled with,
-// and agrees with qt_apple_runningWithLiquidGlass() of a Qt 6.8.5 with qtbase-liquid-glass-opt-out-sdk.patch from
-// crystalidea/qt-build-tools, by which QMacStyle picks its metrics. On other platforms the design is always Classic.
+// the macOS 26 SDK or later. design() reads the SDK recorded in the executable, not the one this library was compiled
+// with, and so agrees with AppKit and with qt_apple_runningWithLiquidGlass() of Qt, by which QMacStyle picks its
+// metrics. On other platforms the design is always Classic.
+//
+// The opt out by UIDesignRequiresCompatibility is not supported: an app that uses this library must not set the key
+// in its Info.plist. AppKit honors the key on macOS 26 whatever the SDK, and on macOS 27 in an app built against an
+// SDK older than 27, while design() doesn't read it, so the controls of the library would follow Liquid Glass in an
+// app that AppKit draws in the classic design.
 
 class QCocoaAppearance
 {

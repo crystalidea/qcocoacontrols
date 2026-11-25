@@ -174,26 +174,12 @@ namespace
 
 QCocoaAppearance::Design QCocoaAppearance::design()
 {
-    static const Design design = []
-    {
-        const int sdk = programSdkMajor();
+    // The SDK and the system are all AppKit goes by in an app without UIDesignRequiresCompatibility, the only kind of
+    // app this library supports (see the header)
+    static const bool liquidGlass = programSdkMajor() >= 26
+                                    && NSProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 26;
 
-        if (sdk < 26 || NSProcessInfo.processInfo.operatingSystemVersion.majorVersion < 26)
-            return Design::Classic;
-
-        // the opt-out key works only for apps built against an SDK older than 27
-        if (sdk < 27)
-        {
-            id optOut = [NSBundle.mainBundle objectForInfoDictionaryKey:@"UIDesignRequiresCompatibility"];
-
-            if (optOut && [optOut boolValue])
-                return Design::Classic;
-        }
-
-        return Design::LiquidGlass;
-    }();
-
-    return design;
+    return liquidGlass ? Design::LiquidGlass : Design::Classic;
 }
 
 void QCocoaAppearance::installWindowContrast()
